@@ -1,9 +1,7 @@
-package Modelos;
+package modelos;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.Random;
-import Modelos.Cuenta;
 
 public class Transaccion {
     private static int cantidadTransacciones;
@@ -18,70 +16,68 @@ public class Transaccion {
     private int intentosValidacion;
     private int cantidadTransaccionesSinComision;
     private int longitudPalabraAleatoria;
-    
 
-    public Transaccion(String tipo, int monto){
+    public Transaccion(String tipo, int monto) {
         this.porcentajeComision = 2.00;
         this.tipo = tipo;
         this.fecha = LocalDateTime.now();
 
     }
 
-    public int realizarRetiro(int montoRetiro, int saldo){
-        if(validarRetiro(montoRetiro, saldo)){
-            if(this.comision == true){
+    public int realizarRetiro(int montoRetiro, int saldo) {
+        if (validarRetiro(montoRetiro, saldo)) {
+            if (this.comision == true) {
                 return (int) (saldo - montoDepositoComision);
-            } else{
+            } else {
                 return saldo - montoRetiro;
             }
-        } else{
+        } else {
             return saldo;
         }
     }
 
-    private boolean validarRetiro(int montoRetiro, int saldo){
-        if(validarAplicacionDeComision()){
-            montoRetiroComision = montoRetiro * (porcentajeComision/100);
-            if(montoRetiroComision > saldo){
+    private boolean validarRetiro(int montoRetiro, int saldo) {
+        if (validarAplicacionDeComision()) {
+            montoRetiroComision = montoRetiro * (porcentajeComision / 100);
+            if (montoRetiroComision > saldo) {
                 return false;
-            }else{
+            } else {
                 return true;
             }
-        }else{
-            if(montoRetiro > saldo){
+        } else {
+            if (montoRetiro > saldo) {
                 return false;
-            }else{
+            } else {
                 return true;
             }
         }
     }
 
-
-    private boolean validarAplicacionDeComision(){
-        if(cantidadTransacciones <= cantidadTransaccionesSinComision){
+    private boolean validarAplicacionDeComision() {
+        if (cantidadTransacciones <= cantidadTransaccionesSinComision) {
             comision = false;
             return false;
-        } else{
+        } else {
             comision = true;
             return true;
         }
     }
 
-    public int realizarDeposito(int montoDeposito, int saldo){
+    public int realizarDeposito(int montoDeposito, int saldo) {
         return saldo -= montoDeposito;
     }
 
-    private String generarPalabraAleatoria(int longitudPalabraAleatoria){
+    private String generarPalabraAleatoria(int longitudPalabraAleatoria) {
         String letras = "abcdefghijklmnopqrstuvwxyz";
         StringBuilder palabra = new StringBuilder();
         Random random = new Random();
-        
+
         for (int i = 0; i < longitudPalabraAleatoria; i++) {
-            int indice = random.nextInt(letras.length());  
-            palabra.append(letras.charAt(indice));         
+            int indice = random.nextInt(letras.length());
+            palabra.append(letras.charAt(indice));
         }
-        
+
         return palabra.toString();
     }
-    
-}   
+
+}

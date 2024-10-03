@@ -1,4 +1,4 @@
-package Controladores;
+package controladores;
 
 public class Cuenta {
 
