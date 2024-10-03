@@ -32,8 +32,8 @@ public class Cliente {
         }
     }
 
-    public void crearCuenta(int saldo, String pin){
-        Cuenta cuenta = new Cuenta(saldo, pin);
+    public void crearCuenta(int saldo, String pin, Cliente cliente){
+        Cuenta cuenta = new Cuenta(saldo, pin, cliente);
         misCuentas.add(cuenta);
     }
 }

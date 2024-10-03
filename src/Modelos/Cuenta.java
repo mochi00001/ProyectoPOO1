@@ -25,12 +25,15 @@ public class Cuenta {
     private Cliente miCliente;
     private ArrayList<Transaccion> transacciones;
 
-    public Cuenta(int saldo, String pin){
+    public Cuenta(int saldo, String pin, Cliente cliente){
+        codigo = "cta-" + cantidadCuentas;
+        cantidadCuentas++;
         this.saldo = saldo;
         this.pin = pin;
-        //this.miCliente = cliente;
-        this.transacciones = new ArrayList<>();
-        this.estatus = "Activa";
+        miCliente = cliente;
+        transacciones = new ArrayList<>();
+        estatus = "Activa";
+        usosPin = 0;
     }
 
     public void agregarTransaccion(String tipo, int monto){
@@ -47,26 +50,27 @@ public class Cuenta {
         }
     }  
 
- /*   public void cambiarPin(String pinNuevo){
+    public void cambiarPin(String pinNuevo){
         if(validarCambioPin(pin, pinNuevo)){
             pin = pinNuevo;
         }
     }
 
     private boolean validarCambioPin(String pinActual, String pinNuevo){
-        if(pinActual.equals(pinNuevo)){
-            return false;
-        }else{
-            return true;
+            if(!pinActual.equals(pinNuevo)){
+                return true;
+            }else{
+                return false;
+            }
         }
-    }
 
     private boolean validarPin(String pin){
-
+        return this.pin.equals(pin);
     }
 
     private String encriptarPin(String pin){
-
+       ////////
+        return "encriptado_" + pin;
     }
 
     private void bloquearCuenta(){
@@ -74,17 +78,22 @@ public class Cuenta {
             estatus = "Inactiva";
         }
     }
-*/
+
     private boolean validarEstatus(){
         if(this.estatus.equals("Activa")){
             return true;
         } return false;
     }
  
-    public void testAgregarTransaccion() {
-        Cuenta cuenta = new Cuenta(50, "stp123");
-        cuenta.agregarTransaccion("Depósito", 100);
-        System.out.println("Se ejecutó la transacción");
+    private boolean validarIngreso(String pinIngresado){
+        while(usosPin <= 3){
+            if(pinIngresado.compareTo(pin) == 0){
+                usosPin = 0;
+                return true;
+            }
+            usosPin++;
+        }
+        bloquearCuenta();
+        return false;
     }
-
 }
