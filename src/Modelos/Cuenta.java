@@ -22,6 +22,16 @@ public class Cuenta {
     private Cliente miCliente;
     private ArrayList<Transaccion> transacciones;
 
+    // Constructor completo para cargar desde XML
+    public Cuenta(String codigo, Date fechaCreacion, int saldo, String pin, String estatus) {
+        this.codigo = codigo;
+        this.fechaCreacion = fechaCreacion;
+        this.saldo = saldo;
+        this.pin = pin;
+        this.estatus = estatus;
+        this.transacciones = new ArrayList<>();
+    }
+    
     public Cuenta(int saldo, String pin) {
         this.saldo = saldo;
         this.pin = pin;
