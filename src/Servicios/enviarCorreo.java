@@ -1,4 +1,4 @@
-package Servicios;
+package servicios;
 
 public class enviarCorreo {
 
