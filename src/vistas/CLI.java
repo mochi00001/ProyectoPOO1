@@ -1,8 +1,8 @@
-package vistas;
+package Vistas;
 
 import java.util.Scanner;
 
-import controladores.BancoControlador;
+import Controladores.BancoControlador;
 
 /**
  * Clase que representa la vista en el patrón MVC, encargada de interactuar

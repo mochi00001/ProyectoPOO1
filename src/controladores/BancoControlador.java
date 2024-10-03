@@ -1,4 +1,4 @@
-package controladores;
+package Controladores;
 
 public class BancoControlador {
     public boolean autenticarCuenta(String numeroCuenta, String pin) {

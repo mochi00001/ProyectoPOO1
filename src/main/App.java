@@ -1,8 +1,8 @@
 package main;
 
 // import vistas.GUI; // Descomentar si se va a usar la GUI
-import controladores.BancoControlador;
-import vistas.CLI;
+import Controladores.BancoControlador;
+import Vistas.CLI;
 
 /**
  * Clase principal que inicializa el sistema bancario. Puede cambiarse entre CLI
