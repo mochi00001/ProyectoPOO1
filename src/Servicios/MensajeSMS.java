@@ -7,7 +7,7 @@ public class MensajeSMS {
 
     // Credenciales de Twilio
     private static final String ACCOUNT_SID = "AC260096de90652894c1ed20f7835f57a6";
-    private static final String AUTH_TOKEN = "f8da62f7d70e99967391dc5a487bf96c";
+    private static final String AUTH_TOKEN = "db7d2aba53f29872c651f47d8768d794";
     private static final String SERVICE_SID = "VA3960d0adfca52a29537f382a7496e79a"; // Servicio de verificación de
                                                                                     // Twilio
 

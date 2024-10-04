@@ -30,13 +30,20 @@ public class Cliente {
         }
     }
 
-<<<<<<< HEAD
-    public void crearCuenta(int saldo, String pin, Cliente cliente){
+    public void crearCuenta(int saldo, String pin, Cliente cliente) {
         Cuenta cuenta = new Cuenta(saldo, pin, cliente);
-=======
-    public void crearCuenta(int saldo, String pin) {
-        Cuenta cuenta = new Cuenta(saldo, pin);
->>>>>>> 3d8900791684dc235b3944d0989966f17be46c85
         misCuentas.add(cuenta);
+    }
+
+    public int getIdentificacion() {
+        return identificacion;
+    }
+
+    public void setNumTelefono(int nuevoTelefono) {
+        this.numTelefono = nuevoTelefono;
+    }
+
+    public void setCorreoElectronico(String nuevoCorreo) {
+        this.correoElectronico = nuevoCorreo;
     }
 }

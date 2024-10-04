@@ -2,20 +2,27 @@ package vistas;
 
 import java.util.Scanner;
 
-import controladores.BancoControlador;
+import controladores.ClienteControlador;
+import controladores.CuentaControlador;
+import controladores.TransaccionesControlador;
 
 /**
  * Clase que representa la vista en el patrón MVC, encargada de interactuar
  * con el usuario a través de una interfaz de línea de comandos (CLI).
  */
 public class CLI {
-    private BancoControlador controlador;
     private Scanner scanner;
     private boolean autenticado = false;
     private String cuentaAutenticada;
+    private ClienteControlador clienteControlador;
+    private CuentaControlador cuentasControlador;
+    private TransaccionesControlador transaccionesControlador;
 
-    public CLI(BancoControlador controlador) {
-        this.controlador = controlador;
+    public CLI(ClienteControlador clienteControlador, CuentaControlador cuentaControlador,
+            TransaccionesControlador transaccionesControlador) {
+        this.clienteControlador = clienteControlador;
+        this.cuentasControlador = cuentaControlador;
+        this.transaccionesControlador = transaccionesControlador;
         this.scanner = new Scanner(System.in);
     }
 
@@ -62,7 +69,7 @@ public class CLI {
             String numeroCuenta = leerString("Ingrese su cuenta de cuenta: ");
             String pin = leerString("Ingrese su PIN: ");
 
-            if (controlador.autenticarCuenta(numeroCuenta, pin)) {
+            if (cuentasControlador.autenticarCuenta(numeroCuenta, pin)) {
                 System.out.println("Autenticación exitosa.");
                 cuentaAutenticada = numeroCuenta;
                 autenticado = true;
@@ -217,18 +224,23 @@ public class CLI {
     // controlador)
     private void crearCliente() {
         String nombre = leerString("Ingrese nombre del cliente: ");
-        String identificacion = leerString("Ingrese identificación: ");
-        String telefono = leerString("Ingrese teléfono: ");
+        int identificacion = leerEntero("Ingrese identificación: ");
+        int telefono = leerEntero("Ingrese teléfono: ");
         String correo = leerString("Ingrese correo: ");
-        // controlador.crearCliente(nombre, identificacion, telefono, correo);
-        System.out.println("Cliente creado exitosamente.");
+
+        boolean resultado = clienteControlador.crearCliente(nombre, identificacion, telefono, correo);
+        if (resultado) {
+            System.out.println("Cliente creado exitosamente.");
+        } else {
+            System.out.println("Error: Ya existe un cliente con la identificación proporcionada.");
+        }
     }
 
     private void cambiarTelefonoCliente() {
-        String identificacion = leerString("Ingrese la identificación del cliente: ");
-        String nuevoTelefono = leerString("Ingrese el nuevo número de teléfono: ");
+        int identificacion = leerEntero("Ingrese la identificación del cliente: ");
+        int nuevoTelefono = leerEntero("Ingrese el nuevo número de teléfono: ");
 
-        boolean resultado = true;// controlador.cambiarTelefonoCliente(identificacion, nuevoTelefono);
+        boolean resultado = clienteControlador.actualizarTelefono(identificacion, nuevoTelefono);
         if (resultado) {
             System.out.println("Número de teléfono actualizado exitosamente.");
         } else {
@@ -237,10 +249,10 @@ public class CLI {
     }
 
     private void cambiarCorreoCliente() {
-        String identificacion = leerString("Ingrese la identificación del cliente: ");
+        int identificacion = leerEntero("Ingrese la identificación del cliente: ");
         String nuevoCorreo = leerString("Ingrese el nuevo correo electrónico: ");
 
-        boolean resultado = true; // controlador.cambiarCorreoCliente(identificacion, nuevoCorreo);
+        boolean resultado = clienteControlador.actualizarCorreo(identificacion, nuevoCorreo);
         if (resultado) {
             System.out.println("Correo electrónico actualizado exitosamente.");
         } else {
