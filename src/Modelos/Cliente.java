@@ -1,16 +1,17 @@
 package modelos;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Cliente {
     private String nombre;
     private int identificacion;
-    private int numTelefono;
+    private String numTelefono;
     private String correoElectronico;
     private ArrayList<String> identificaciones;
     private ArrayList<Cuenta> misCuentas;
 
-    public Cliente(String nombre, int identificacion, int numTelefono, String correoElectronico) {
+    public Cliente(String nombre, int identificacion, String numTelefono, String correoElectronico) {
         identificaciones = new ArrayList<>();
         if (validarIdentificacion(identificacion)) {
             this.identificacion = identificacion;
@@ -22,6 +23,21 @@ public class Cliente {
         identificaciones.add(String.valueOf(identificacion));
     }
 
+    //Getters y setters
+
+    public int getIdentificacion(){
+        return identificacion;
+    }
+
+    public String getCorreoElectronico(){
+        return correoElectronico;
+    }
+
+    public String getNumTelefono(){
+        return numTelefono;
+    }
+
+
     private boolean validarIdentificacion(int identificacion) {
         if (identificaciones.contains(String.valueOf(identificacion))) {
             return false;
@@ -30,13 +46,20 @@ public class Cliente {
         }
     }
 
-<<<<<<< HEAD
     public void crearCuenta(int saldo, String pin, Cliente cliente){
         Cuenta cuenta = new Cuenta(saldo, pin, cliente);
-=======
-    public void crearCuenta(int saldo, String pin) {
-        Cuenta cuenta = new Cuenta(saldo, pin);
->>>>>>> 3d8900791684dc235b3944d0989966f17be46c85
         misCuentas.add(cuenta);
+    }
+
+    public void eliminarCuenta(String codigo){
+        Iterator<Cuenta> iterator = misCuentas.iterator();
+
+        while (iterator.hasNext()) {
+            Cuenta cuenta = iterator.next();
+            if (cuenta.getCodigo().equals(codigo)) {
+                iterator.remove(); // Elimina la cuenta de la lista
+                break;
+            }
+        }
     }
 }

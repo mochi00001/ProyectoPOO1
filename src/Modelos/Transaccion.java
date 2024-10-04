@@ -2,6 +2,7 @@ package modelos;
 
 import java.time.LocalDateTime;
 import java.util.Random;
+import servicios.MensajeSMS;
 
 public class Transaccion {
     private static int cantidadTransacciones;
@@ -21,7 +22,8 @@ public class Transaccion {
         this.porcentajeComision = 2.00;
         this.tipo = tipo;
         this.fecha = LocalDateTime.now();
-
+        longitudPalabraAleatoria = 7;
+    
     }
 
     public int realizarRetiro(int montoRetiro, int saldo) {
@@ -67,7 +69,7 @@ public class Transaccion {
         return saldo -= montoDeposito;
     }
 
-    private String generarPalabraAleatoria(int longitudPalabraAleatoria) {
+    public String generarPalabraAleatoria() {
         String letras = "abcdefghijklmnopqrstuvwxyz";
         StringBuilder palabra = new StringBuilder();
         Random random = new Random();
@@ -76,8 +78,9 @@ public class Transaccion {
             int indice = random.nextInt(letras.length());
             palabra.append(letras.charAt(indice));
         }
-
         return palabra.toString();
     }
+
+    
 
 }

@@ -1,12 +1,17 @@
 package modelos;
 
+import servicios.CorreoElectronico;
+import servicios.MensajeSMS;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Random;
+
 
 public class Cuenta {
     private String codigo;
     private static int cantidadCuentas;
-    private Date fechaCreacion;
+    private LocalDate fechaCreacion;
     private String estatus;
     private int saldo;
     private String pin;
@@ -22,7 +27,7 @@ public class Cuenta {
     private Cliente miCliente;
     private ArrayList<Transaccion> transacciones;
 
-<<<<<<< HEAD
+
     public Cuenta(int saldo, String pin, Cliente cliente){
         codigo = "cta-" + cantidadCuentas;
         cantidadCuentas++;
@@ -32,30 +37,60 @@ public class Cuenta {
         transacciones = new ArrayList<>();
         estatus = "Activa";
         usosPin = 0;
-=======
-    public Cuenta(int saldo, String pin) {
-        this.saldo = saldo;
-        this.pin = pin;
-        // this.miCliente = cliente;
-        this.transacciones = new ArrayList<>();
-        this.estatus = "Activa";
->>>>>>> 3d8900791684dc235b3944d0989966f17be46c85
+        fechaCreacion = LocalDate.now();
+        
     }
 
-    public void agregarTransaccion(String tipo, int monto) {
-        if (validarEstatus()) {
-            Transaccion nuevaTransaccion = new Transaccion(tipo, monto);
+    //Getters y Setters
+    public String getCodigo(){
+        return codigo;
+    }
+
+    public int getSaldo(){
+        return saldo;
+    }
+
+    public String getEstatus(){
+        return estatus;
+    }
+
+    //Funcionalidades
+    public boolean agregarRetiro(int pMonto, String pCodigo){
+        String  tipo = "Retiro";
+        if (validarEstatus()){
+            Transaccion nuevaTransaccion = new Transaccion(tipo, pMonto);
             transacciones.add(nuevaTransaccion);
-            if (tipo.equals("Retiro")) {
-                nuevaTransaccion.realizarRetiro(monto, this.saldo);
-            } else {
-                if (tipo.equals("Depósito")) {
-                    nuevaTransaccion.realizarDeposito(monto, this.saldo);
+            MensajeSMS mensajeCodigo = new MensajeSMS();
+            boolean mensaje = mensajeCodigo.enviarMensajeVerificacion(miCliente.getNumTelefono(), generarCodigoAleatorio());
+            if(mensaje){
+                if(mensajeCodigo.verificarCodigo(pCodigo)){
+                    nuevaTransaccion.realizarRetiro(pMonto, saldo);
+                    sumaRetiros += pMonto;
+                    return true;
                 }
-            }
+                else{
+                    return false;
+                }    
+            }else{
+                return false;
+            }   
         }
-<<<<<<< HEAD
-    }  
+        else{
+            return false;
+        }
+    }
+
+    public boolean agregarDeposito(int pMonto){
+        String  tipo = "Depósito";
+        if (validarEstatus()){
+            Transaccion nuevaTransaccion = new Transaccion(tipo, pMonto);
+            nuevaTransaccion.realizarDeposito(pMonto, saldo);
+            sumaDepositos += pMonto;
+            return true;
+        }else{
+            return false;
+        }
+    }
 
     public void cambiarPin(String pinNuevo){
         if(validarCambioPin(pin, pinNuevo)){
@@ -76,14 +111,15 @@ public class Cuenta {
     }
 
     private String encriptarPin(String pin){
-       ////////
         return "encriptado_" + pin;
     }
 
     private void bloquearCuenta(){
         if(estatus.equals("Activa")){
             estatus = "Inactiva";
+            CorreoElectronico.enviarCorreo(miCliente.getCorreoElectronico(), "Su cuenta se encuentra inactiva debido a que se intentó autenticar más de tres veces");
         }
+
     }
 
     private boolean validarEstatus(){
@@ -102,49 +138,21 @@ public class Cuenta {
         }
         bloquearCuenta();
         return false;
-=======
     }
 
-    /*
-     * public void cambiarPin(String pinNuevo){
-     * if(validarCambioPin(pin, pinNuevo)){
-     * pin = pinNuevo;
-     * }
-     * }
-     * 
-     * private boolean validarCambioPin(String pinActual, String pinNuevo){
-     * if(pinActual.equals(pinNuevo)){
-     * return false;
-     * }else{
-     * return true;
-     * }
-     * }
-     * 
-     * private boolean validarPin(String pin){
-     * 
-     * }
-     * 
-     * private String encriptarPin(String pin){
-     * 
-     * }
-     * 
-     * private void bloquearCuenta(){
-     * if(estatus.equals("Activa")){
-     * estatus = "Inactiva";
-     * }
-     * }
-     */
-    private boolean validarEstatus() {
-        if (this.estatus.equals("Activa")) {
-            return true;
+    private String generarCodigoAleatorio(){
+        String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder codigo = new StringBuilder(6);
+        Random random = new Random();
+
+        // Generar código de 6 caracteres
+        for (int i = 0; i < 6; i++) {
+            int index = random.nextInt(caracteres.length());  // Seleccionar un índice aleatorio
+            codigo.append(caracteres.charAt(index));  // Añadir el carácter al código
         }
-        return false;
-    }
 
-    public void testAgregarTransaccion() {
-        Cuenta cuenta = new Cuenta(50, "stp123");
-        cuenta.agregarTransaccion("Depósito", 100);
-        System.out.println("Se ejecutó la transacción");
->>>>>>> 3d8900791684dc235b3944d0989966f17be46c85
+        return codigo.toString();
     }
 }
+
+
