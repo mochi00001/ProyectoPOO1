@@ -5,12 +5,12 @@ import java.util.ArrayList;
 public class Cliente {
     private String nombre;
     private int identificacion;
-    private int numTelefono;
+    private String numTelefono;
     private String correoElectronico;
     private ArrayList<String> identificaciones;
     private ArrayList<Cuenta> misCuentas;
 
-    public Cliente(String nombre, int identificacion, int numTelefono, String correoElectronico) {
+    public Cliente(String nombre, int identificacion, String numTelefono, String correoElectronico) {
         identificaciones = new ArrayList<>();
         if (validarIdentificacion(identificacion)) {
             this.identificacion = identificacion;
@@ -20,6 +20,20 @@ public class Cliente {
         this.correoElectronico = correoElectronico;
         this.identificacion = identificacion;
         identificaciones.add(String.valueOf(identificacion));
+    }
+
+    // Getters y setters
+
+    public int getIdentificacion() {
+        return identificacion;
+    }
+
+    public String getCorreoElectronico() {
+        return correoElectronico;
+    }
+
+    public String getNumTelefono() {
+        return numTelefono;
     }
 
     private boolean validarIdentificacion(int identificacion) {
@@ -35,11 +49,7 @@ public class Cliente {
         misCuentas.add(cuenta);
     }
 
-    public int getIdentificacion() {
-        return identificacion;
-    }
-
-    public void setNumTelefono(int nuevoTelefono) {
+    public void setNumTelefono(String nuevoTelefono) {
         this.numTelefono = nuevoTelefono;
     }
 

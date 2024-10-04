@@ -225,7 +225,7 @@ public class CLI {
     private void crearCliente() {
         String nombre = leerString("Ingrese nombre del cliente: ");
         int identificacion = leerEntero("Ingrese identificación: ");
-        int telefono = leerEntero("Ingrese teléfono: ");
+        String telefono = leerString("Ingrese teléfono: ");
         String correo = leerString("Ingrese correo: ");
 
         boolean resultado = clienteControlador.crearCliente(nombre, identificacion, telefono, correo);
@@ -238,7 +238,7 @@ public class CLI {
 
     private void cambiarTelefonoCliente() {
         int identificacion = leerEntero("Ingrese la identificación del cliente: ");
-        int nuevoTelefono = leerEntero("Ingrese el nuevo número de teléfono: ");
+        String nuevoTelefono = leerString("Ingrese el nuevo número de teléfono: ");
 
         boolean resultado = clienteControlador.actualizarTelefono(identificacion, nuevoTelefono);
         if (resultado) {

@@ -1,17 +1,21 @@
 package modelos;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import servicios.CorreoElectronico;
+import servicios.MensajeSMS;
+
 public class Cuenta {
     private String codigo;
     private static int cantidadCuentas;
-    private Date fechaCreacion;
+    private LocalDate fechaCreacion;
     private String estatus;
     private int saldo;
     private String pin;
@@ -26,6 +30,7 @@ public class Cuenta {
     private int usosPin;
     private Cliente miCliente;
     private ArrayList<Transaccion> transacciones;
+    private int intentosValidacion;
 
     public Cuenta(int saldo, String pin, Cliente cliente) {
         codigo = "cta-" + cantidadCuentas;
@@ -38,16 +43,39 @@ public class Cuenta {
         usosPin = 0;
     }
 
-    public void agregarTransaccion(String tipo, int monto) {
+    // Getters y Setters
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public int getSaldo() {
+        return saldo;
+    }
+
+    public String getEstatus() {
+        return estatus;
+    }
+
+    // Funcionalidades
+    public void agregarRetiro(int pMonto, String pCodigo) {
+        String tipo = "Retiro";
         if (validarEstatus()) {
-            Transaccion nuevaTransaccion = new Transaccion(tipo, monto);
+            Transaccion nuevaTransaccion = new Transaccion(tipo, pMonto);
             transacciones.add(nuevaTransaccion);
-            if (tipo.equals("Retiro")) {
-                nuevaTransaccion.realizarRetiro(monto, this.saldo);
-            } else {
-                if (tipo.equals("Depósito")) {
-                    nuevaTransaccion.realizarDeposito(monto, this.saldo);
+            MensajeSMS mensajeCodigo = new MensajeSMS();
+            boolean mensaje = mensajeCodigo.enviarMensajeVerificacion(miCliente.getNumTelefono(),
+                    generarCodigoAleatorio());
+            if (mensaje) {
+                while (intentosValidacion <= 3) {
+                    if (mensajeCodigo.verificarCodigo(pCodigo)) {
+                        nuevaTransaccion.realizarRetiro(pMonto, saldo);
+                        sumaRetiros += pMonto;
+                        break;
+                    } else {
+                        intentosValidacion += 1;
+                    }
                 }
+                bloquearCuenta();
             }
         }
     }
@@ -67,7 +95,10 @@ public class Cuenta {
     private void bloquearCuenta() {
         if (estatus.equals("Activa")) {
             estatus = "Inactiva";
+            CorreoElectronico.enviarCorreo(miCliente.getCorreoElectronico(),
+                    "Su cuenta se encuentra inactiva debido a que se intentó autenticar más de tres veces");
         }
+
     }
 
     private boolean validarEstatus() {
@@ -142,19 +173,18 @@ public class Cuenta {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            Cuenta cuenta = new Cuenta(1000, "Ab1234", new Cliente("Luis", 208190240, 89655235, "luis@gmail.com")); // Debes
-                                                                                                                    // definir
-                                                                                                                    // la
-                                                                                                                    // clase
-                                                                                                                    // Cliente
-            cuenta.cambiarPin("Ab5678");
-            System.out.println("PIN encriptado: " + cuenta.pinEncriptado);
-            String pinDesencriptado = cuenta.desencriptarPin(cuenta.pinEncriptado);
-            System.out.println("PIN desencriptado: " + pinDesencriptado);
-        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
+    public static String generarCodigoAleatorio() {
+        String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder codigo = new StringBuilder(6);
+        Random random = new Random();
+
+        // Generar código de 6 caracteres
+        for (int i = 0; i < 6; i++) {
+            int index = random.nextInt(caracteres.length()); // Seleccionar un índice aleatorio
+            codigo.append(caracteres.charAt(index)); // Añadir el carácter al código
         }
+
+        return codigo.toString();
     }
+
 }

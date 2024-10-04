@@ -12,7 +12,7 @@ public class ClienteControlador {
         this.clientes = new ArrayList<>();
     }
 
-    public boolean crearCliente(String nombre, int identificacion, int numTelefono, String correoElectronico) {
+    public boolean crearCliente(String nombre, int identificacion, String numTelefono, String correoElectronico) {
         if (buscarClientePorIdentificacion(identificacion) == null) {
             Cliente nuevoCliente = new Cliente(nombre, identificacion, numTelefono, correoElectronico);
             clientes.add(nuevoCliente);
@@ -22,7 +22,7 @@ public class ClienteControlador {
         }
     }
 
-    public boolean actualizarTelefono(int identificacion, int nuevoTelefono) {
+    public boolean actualizarTelefono(int identificacion, String nuevoTelefono) {
         Cliente cliente = buscarClientePorIdentificacion(identificacion);
         if (cliente != null) {
             cliente.setNumTelefono(nuevoTelefono);
