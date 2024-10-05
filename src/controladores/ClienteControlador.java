@@ -42,7 +42,7 @@ public class ClienteControlador {
         }
     }
 
-    private Cliente buscarClientePorIdentificacion(int identificacion) {
+    public Cliente buscarClientePorIdentificacion(int identificacion) {
         for (Cliente cliente : clientes) {
             if (cliente.getIdentificacion() == identificacion) {
                 return cliente;

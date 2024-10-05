@@ -5,6 +5,7 @@ import java.util.Scanner;
 import controladores.ClienteControlador;
 import controladores.CuentaControlador;
 import controladores.TransaccionesControlador;
+import modelos.Cliente;
 
 /**
  * Clase que representa la vista en el patrón MVC, encargada de interactuar
@@ -264,19 +265,32 @@ public class CLI {
     // la lógica real estará en el
     // controlador)
     private void crearCuenta() {
-        String numeroCuenta = leerString("Ingrese número de cuenta: ");
-        double saldoInicial = leerEntero("Ingrese saldo inicial: ");
-        String pin = leerString("Ingrese PIN: ");
-        // controlador.crearCuenta(numeroCuenta, saldoInicial, pin);
-        System.out.println("Cuenta creada exitosamente.");
+        int saldoInicial = leerEntero("Ingrese saldo inicial: ");
+        String pin = leerString("Ingrese PIN (debe tener 6 caracteres, al menos una letra mayúscula y un número): ");
+        System.out.print("Ingrese identificación del cliente para asignar la cuenta: ");
+        int identificacion = leerEntero("");
+
+        Cliente cliente = clienteControlador.buscarClientePorIdentificacion(identificacion);
+
+        if (cliente != null) {
+            boolean resultado = cuentasControlador.crearCuenta(saldoInicial, pin, cliente);
+            if (resultado) {
+                System.out.println("Cuenta creada exitosamente.");
+            } else {
+                System.out.println("Error al crear la cuenta. Verifique los datos.");
+            }
+        } else {
+            System.out.println("Cliente no encontrado. Verifique la identificación proporcionada.");
+        }
     }
 
     private void cambiarPin() {
         String numeroCuenta = leerString("Ingrese el número de cuenta: ");
         String pinActual = leerString("Ingrese el PIN actual: ");
-        String nuevoPin = leerString("Ingrese el nuevo PIN: ");
+        String nuevoPin = leerString(
+                "Ingrese el nuevo PIN (debe tener 6 caracteres, al menos una letra mayúscula y un número): ");
 
-        boolean resultado = true; // controlador.cambiarPinCuenta(numeroCuenta, pinActual, nuevoPin);
+        boolean resultado = cuentasControlador.cambiarPinCuenta(numeroCuenta, pinActual, nuevoPin);
         if (resultado) {
             System.out.println("PIN actualizado exitosamente.");
         } else {
@@ -288,7 +302,7 @@ public class CLI {
         String numeroCuenta = leerString("Ingrese el número de cuenta a eliminar: ");
         String pin = leerString("Ingrese el PIN de la cuenta: ");
 
-        boolean resultado = true; // controlador.eliminarCuenta(numeroCuenta, pin);
+        boolean resultado = cuentasControlador.eliminarCuenta(numeroCuenta, pin);
         if (resultado) {
             System.out.println("Cuenta eliminada exitosamente.");
         } else {
@@ -297,12 +311,11 @@ public class CLI {
     }
 
     // Métodos para las operaciones del menú de operaciones financieras
-
     private void realizarDepositoColones() {
         String numeroCuenta = leerString("Ingrese el número de cuenta: ");
         int monto = leerEntero("Ingrese el monto a depositar en colones: ");
 
-        boolean resultado = true; // controlador.realizarDeposito(numeroCuenta, monto);
+        boolean resultado = transaccionesControlador.realizarDeposito(numeroCuenta, monto);
         if (resultado) {
             System.out.println("Depósito realizado exitosamente.");
         } else {
@@ -314,15 +327,16 @@ public class CLI {
         String numeroCuenta = leerString("Ingrese el número de cuenta: ");
         int montoDolares = leerEntero("Ingrese el monto a depositar en dólares: ");
 
-        // Obtener el tipo de cambio de compra
+        // Obtener el tipo de cambio de compra (esto podría venir de otro servicio o
+        // clase)
         double tipoCambioCompra = 533.0; // controlador.obtenerTipoCambioCompra();
 
-        // Convertir dólares a colones
-        int montoColones = (int) (montoDolares * tipoCambioCompra);
-
-        boolean resultado = true; // controlador.realizarDeposito(numeroCuenta, montoColones);
+        // Convertir dólares a colones y realizar el depósito
+        boolean resultado = transaccionesControlador.realizarDepositoDolares(numeroCuenta, montoDolares,
+                tipoCambioCompra);
         if (resultado) {
-            System.out.println("Depósito realizado exitosamente. (Monto en colones: " + montoColones + ")");
+            System.out.println("Depósito realizado exitosamente. (Monto en colones: "
+                    + (int) (montoDolares * tipoCambioCompra) + ")");
         } else {
             System.out.println("Error: No se encontró la cuenta o el monto ingresado no es válido.");
         }
@@ -333,7 +347,7 @@ public class CLI {
         String pin = leerString("Ingrese el PIN de la cuenta: ");
         int montoRetiro = leerEntero("Ingrese el monto a retirar: ");
 
-        boolean resultado = true; // controlador.realizarRetiro(numeroCuenta, pin, montoRetiro);
+        boolean resultado = transaccionesControlador.realizarRetiro(numeroCuenta, pin, montoRetiro);
         if (resultado) {
             System.out.println("Retiro realizado exitosamente. Monto retirado: " + montoRetiro);
         } else {
@@ -341,7 +355,6 @@ public class CLI {
                     "Error: No se pudo realizar el retiro. Verifique el PIN, el saldo disponible, o la cuenta ingresada.");
         }
     }
-
     // Métodos para las operaciones del menú de consultas y reportes
 
     private void consultarTransacciones() {

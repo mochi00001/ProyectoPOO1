@@ -52,8 +52,16 @@ public class Cuenta {
         return saldo;
     }
 
+    public void setSaldo(int pSaldo) {
+        saldo = pSaldo;
+    }
+
     public String getEstatus() {
         return estatus;
+    }
+
+    public ArrayList<Transaccion> getTransacciones() {
+        return transacciones;
     }
 
     // Funcionalidades
@@ -108,7 +116,7 @@ public class Cuenta {
         return false;
     }
 
-    private boolean validarIngreso(String pinIngresado) {
+    public boolean validarIngreso(String pinIngresado) {
         while (usosPin <= 3) {
             if (pinIngresado.compareTo(pin) == 0) {
                 usosPin = 0;
