@@ -10,8 +10,8 @@ public class TransaccionesControlador {
     // Mapa para almacenar las cuentas
     private HashMap<String, Cuenta> cuentas;
 
-    public TransaccionesControlador(HashMap<String, Cuenta> cuentas) {
-        this.cuentas = cuentas;
+    public TransaccionesControlador() {
+        this.cuentas = new HashMap<String, Cuenta>();
     }
 
     // Método para realizar un depósito en colones
