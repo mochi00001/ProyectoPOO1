@@ -19,13 +19,8 @@ public class Cuenta {
     private String estatus;
     private int saldo;
     private String pin;
-    private double sumaComisiones;
-    private double sumaComisionesRetiros;
-    private double sumaComisionesDepositos;
     private int sumaRetiros;
     private int sumaDepositos;
-    private String monedaOficial;
-    private String monedaExtrangera;
     private String pinEncriptado;
     private int usosPin;
     private Cliente miCliente;
