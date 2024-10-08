@@ -27,9 +27,23 @@ public class Cuenta {
     private ArrayList<Transaccion> transacciones;
     private int intentosValidacion;
 
+<<<<<<< HEAD
     public Cuenta(int saldo, String pin, Cliente cliente) {
         codigo = "cta-" + cantidadCuentas;
         cantidadCuentas++;
+=======
+    // Constructor completo para cargar desde XML
+    public Cuenta(String codigo, Date fechaCreacion, int saldo, String pin, String estatus) {
+        this.codigo = codigo;
+        this.fechaCreacion = fechaCreacion;
+        this.saldo = saldo;
+        this.pin = pin;
+        this.estatus = estatus;
+        this.transacciones = new ArrayList<>();
+    }
+    
+    public Cuenta(int saldo, String pin) {
+>>>>>>> 64096002d68718c9433009b916ba0de47ecfc64e
         this.saldo = saldo;
         this.pin = pin;
         miCliente = cliente;

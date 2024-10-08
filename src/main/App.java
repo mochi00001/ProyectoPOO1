@@ -1,5 +1,7 @@
 package main;
 
+import java.util.List;
+
 import controladores.ClienteControlador;
 import controladores.CuentaControlador;
 import controladores.TransaccionesControlador;
@@ -44,5 +46,20 @@ public class App {
         // Aquí iría el código para inicializar la interfaz gráfica (GUI)
         // GUI gui = new GUI(controlador);
         // gui.iniciar();
+    }
+
+    public static void main(String[] args) {
+        // Cargar las cuentas desde el archivo XML al iniciar la aplicación
+        List<Cuenta> cuentas = persistenciaDatos.cargarCuentasDesdeXML("data/cuentas.xml");
+
+        // Crear el controlador y pasarle las cuentas
+        BancoControlador bancoControlador = new BancoControlador(cuentas);
+
+        // Iniciar la vista CLI con el controlador
+        CLI cli = new CLI(bancoControlador);
+        cli.iniciar();
+
+        // Guardar las cuentas al salir de la aplicación
+        persistenciaDatos.guardarCuentasEnXML(bancoControlador.obtenerCuentas(), "data/cuentas.xml");
     }
 }
