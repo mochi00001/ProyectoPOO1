@@ -11,10 +11,17 @@ public class Formato {
      * @return true si el PIN es válido, false en caso contrario
      */
     public static boolean validarFormatoPin(String pin) {
-        String regex = "^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{6}$";
-        return pin.matches(regex);
-    }
+        // Verificar que el PIN no sea nulo y tenga longitud 6
+        if (pin == null || pin.length() != 6) {
+            return false;
+        }
 
+        // Expresión regular para validar el PIN
+        String regex = "^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{6}$";
+        Pattern pattern = Pattern.compile(regex);
+        return pattern.matcher(pin).matches();
+    }
+    
     // Método para validar el número telefónico
     public static boolean validarTelefono(String telefono) {
         // Validar que el número de teléfono tenga el formato "+506" seguido de 8 dígitos

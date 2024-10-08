@@ -1,18 +1,20 @@
 package modelos;
 
+import servicios.MensajeSMS;
+import servicios.CorreoElectronico;
+import validacion.Formato;
+
 import java.time.LocalDate;
+import java.util.List;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 import java.util.Base64;
 import java.util.Random;
-import java.util.regex.Pattern;
 import java.util.Objects;
-
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-import servicios.CorreoElectronico;
-import servicios.MensajeSMS;
 
 public class Cuenta {
     private String codigo;
@@ -22,12 +24,13 @@ public class Cuenta {
     private double saldo;
     private String pin;
     private Cliente miCliente;
-    private ArrayList<Transaccion> transacciones;
-    
-    private int intentosValidacion;
-    private int usosPin;
+    private List<Transaccion> transacciones; 
+
+    private int intentosValidacion = 0;
+    private int usosPin = 0;
     private String pinEncriptado;
-    private int sumaRetiros;
+    private double sumaRetiros = 0; //Verificar uso
+
 
     public Cuenta(double saldo, String pin, Cliente cliente) {
         this.codigo = "cta-" + cantidadCuentas++;
@@ -39,7 +42,25 @@ public class Cuenta {
         this.fechaCreacion = LocalDate.now();
         //this.pinEncriptado = encriptarPin(pin);
         //System.out.println("Cuenta creada: " + codigo + ", PIN encriptado: " + pinEncriptado);
+        this.transacciones = new ArrayList<>();
     }
+
+    // Funcionalidades
+    public List<Transaccion> getTransacciones() {
+        return transacciones;
+    }
+
+    public ArrayList<Transaccion> obtenerTransaccionesPorCodigo(String codigoCuenta) {
+        ArrayList<Transaccion> transaccionesPorCodigo = new ArrayList<>();
+        for (Transaccion transaccion : transacciones) {
+            if (transaccion.getCodigoCuenta().equals(codigoCuenta)) {
+                transaccionesPorCodigo.add(transaccion);
+            }
+        }
+        return transaccionesPorCodigo;
+    }
+
+    
 
     // Getters y Setters
     public String getCodigo() {
@@ -49,14 +70,15 @@ public class Cuenta {
     public double getSaldo() {
         return saldo;
     }
-    
+
+    public void setSaldo(double saldo) {
+        this.saldo = saldo;
+    }
+
     public String getSaldoFormateado() {
         return String.format("%.2f", saldo);
     }
 
-    public void setSaldo(int pSaldo) {
-        saldo = pSaldo;
-    }
 
     public String getEstatus() {
         return estatus;
@@ -74,27 +96,27 @@ public class Cuenta {
         this.pin = nuevoPin; // Asigna el nuevo PIN
         //this.pinEncriptado = encriptarPin(nuevoPin); // Encripta el nuevo PIN
     }
-
-    public ArrayList<Transaccion> getTransacciones() {
-        return transacciones;
-    }
-
-    public ArrayList<Transaccion> obtenerTransaccionesPorCodigo(String codigoCuenta) {
-        ArrayList<Transaccion> transaccionesPorCodigo = new ArrayList<>();
-        for (Transaccion transaccion : transacciones) {
-            if (transaccion.getCodigoCuenta().equals(codigoCuenta)) {
-                transaccionesPorCodigo.add(transaccion);
-            }
-        }
-        return transaccionesPorCodigo;
-    }
+    
+    
 
     // Funcionalidades
+    public void realizarDeposito(double cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad a depositar debe ser positiva.");
+        }
+        this.saldo += cantidad; // Aumentar el saldo con la cantidad depositada
+        // Puedes agregar un mensaje para depuración
+        System.out.println("Depósito realizado: " + cantidad + " en la cuenta " + this.codigo);
+    }
+    
+
     public void agregarRetiro(int pMonto, String pCodigo) {
         String tipo = "Retiro";
         if (validarEstatus()) {
-            Transaccion nuevaTransaccion = new Transaccion(tipo, pMonto);
+            // Asegúrate de pasar el código de cuenta al crear la transacción
+            Transaccion nuevaTransaccion = new Transaccion(tipo, pMonto, this.codigo);
             transacciones.add(nuevaTransaccion);
+            
             MensajeSMS mensajeCodigo = new MensajeSMS();
             boolean mensaje = mensajeCodigo.enviarMensajeVerificacion(miCliente.getNumTelefono(),
                     generarCodigoAleatorio());
@@ -112,6 +134,7 @@ public class Cuenta {
             }
         }
     }
+    
 
     private boolean validarCambioPin(String pinActual, String pinNuevo) {
         return !pinActual.equals(pinNuevo);
@@ -127,7 +150,6 @@ public class Cuenta {
             CorreoElectronico.enviarCorreo(miCliente.getCorreoElectronico(),
                     "Su cuenta se encuentra inactiva debido a que se intentó autenticar más de tres veces");
         }
-
     }
 
     private boolean validarEstatus() {
@@ -156,6 +178,9 @@ public class Cuenta {
             return false; // Manejo de excepción
         }
     }
+    
+    
+    
 
     public String getPinEncriptado() {
         return pinEncriptado;
@@ -166,11 +191,11 @@ public class Cuenta {
     }
 
     // Llave de cifrado (debe ser de 16 bytes para AES-128)
-    private static final String CLAVE_SECRETA = "clave123456789012";
+    private static final String CLAVE_SECRETA = "clave12345678901"; // Asegúrate de que tenga 16 bytes.
 
     public String encriptarPin(String pin) throws Exception {
         // Validar el formato del PIN antes de encriptarlo
-        if (!validarFormatoPin(pin)) {
+        if (!Formato.validarFormatoPin(pin)) {
             throw new IllegalArgumentException("El PIN no cumple con el formato requerido.");
         }
 
@@ -189,18 +214,7 @@ public class Cuenta {
         byte[] desencriptado = cipher.doFinal(decodificado);
         return new String(desencriptado);
     }
-
-    private boolean validarFormatoPin(String pin) {
-        // Verificar que el PIN no sea nulo y tenga longitud 6
-        if (pin == null || pin.length() != 6) {
-            return false;
-        }
-
-        // Expresión regular para validar el PIN
-        String regex = "^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{6}$";
-        Pattern pattern = Pattern.compile(regex);
-        return pattern.matcher(pin).matches();
-    }
+    
 
     // Ejemplo de cómo usar el método de encriptación cuando se establece un nuevo
     // PIN
@@ -230,6 +244,19 @@ public class Cuenta {
     }
 
     @Override
+    public String toString() {
+        String identificacionStr = (miCliente != null) ? String.valueOf(miCliente.getIdentificacion()) : "Sin Cliente";
+        return "Cuenta{" +
+                "numeroCuenta='" + codigo + '\'' +
+                ", estatus='" + estatus + '\'' +
+                ", saldo=" + saldo +
+                ", identificacion='" + identificacionStr + '\'' +
+                '}';
+    }
+
+
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof Cuenta)) return false;
@@ -242,3 +269,4 @@ public class Cuenta {
         return Objects.hash(codigo); // Asegúrate de que 'codigo' es único para cada cuenta
     }
 }
+
