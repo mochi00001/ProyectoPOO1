@@ -17,7 +17,7 @@ import vistas.CLI;
 public class App {
     public static void main(String[] args) {
         CuentaControlador cuentaControlador = new CuentaControlador();
-        ClienteControlador clienteControlador = new ClienteControlador();
+        ClienteControlador clienteControlador = new ClienteControlador(cuentaControlador);
         TransaccionesControlador transaccionesControlador = new TransaccionesControlador();
 
         // Inicializa la aplicación con CLI
@@ -43,23 +43,7 @@ public class App {
      */
     private static void iniciarGUI(CuentaControlador cuentaControlador, ClienteControlador clienteControlador,
             TransaccionesControlador transaccionesControlador) {
-        // Aquí iría el código para inicializar la interfaz gráfica (GUI)
-        // GUI gui = new GUI(controlador);
-        // gui.iniciar();
-    }
-
-    public static void main(String[] args) {
-        // Cargar las cuentas desde el archivo XML al iniciar la aplicación
-        List<Cuenta> cuentas = persistenciaDatos.cargarCuentasDesdeXML("data/cuentas.xml");
-
-        // Crear el controlador y pasarle las cuentas
-        BancoControlador bancoControlador = new BancoControlador(cuentas);
-
-        // Iniciar la vista CLI con el controlador
-        CLI cli = new CLI(bancoControlador);
-        cli.iniciar();
-
-        // Guardar las cuentas al salir de la aplicación
-        persistenciaDatos.guardarCuentasEnXML(bancoControlador.obtenerCuentas(), "data/cuentas.xml");
-    }
+        GUI gui = new GUI(cuentaControlador, clienteControlador, transaccionesControlador);
+        gui.iniciar();
+    } 
 }

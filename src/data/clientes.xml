@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<clientes>
+    <cliente>
+        <nombre>Ma Luisa Perez</nombre>
+        <identificacion>108310340</identificacion>
+        <numTelefono>+50685069751</numTelefono>
+        <correoElectronico>maluisa-40@hotmail.com</correoElectronico>
+    </cliente>
+    <cliente>
+        <nombre>Fernanda Sánchez</nombre>
+        <identificacion>305260528</identificacion>
+        <numTelefono>+50687068702</numTelefono>
+        <correoElectronico>fernandasperez1@gmail.com</correoElectronico>
+    </cliente>
+    <cliente>
+        <nombre>Luis Sanchez</nombre>
+        <identificacion>109400365</identificacion>
+        <numTelefono>+50687068702</numTelefono>
+        <correoElectronico>maluisa-40@hotmail.com</correoElectronico>
+    </cliente>
+</clientes>

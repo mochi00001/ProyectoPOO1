@@ -1,1 +1,39 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><cuentas><cuenta><numeroCuenta>0011223344</numeroCuenta><saldo>1000.0</saldo><dueño><nombreCompleto>Juan Alvarez</nombreCompleto><identificacion>12345689</identificacion><telefono>1234567890</telefono><correo>john.doe@example.com</correo></dueño><pin>1234</pin></cuenta><cuenta><numeroCuenta>00112223344</numeroCuenta><saldo>5000.0</saldo><dueño><nombreCompleto>Feranda</nombreCompleto><identificacion>12d5689</identificacion><telefono>3234567890</telefono><correo>fernanda@example.com</correo></dueño><pin>1274</pin></cuenta></cuentas>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<cuentas>
+    <cuenta>
+        <numeroCuenta>cta-0</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>9000.00</saldo>
+        <identificacion>305260528</identificacion>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-1</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>7000.00</saldo>
+        <identificacion>108310340</identificacion>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-2</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>6000.00</saldo>
+        <identificacion>108310340</identificacion>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-3</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>5550.00</saldo>
+        <identificacion>305260528</identificacion>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-4</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>4500.00</saldo>
+        <identificacion>305260528</identificacion>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-5</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>60000.00</saldo>
+        <identificacion>305260528</identificacion>
+    </cuenta>
+</cuentas>

@@ -17,41 +17,36 @@ public class Transaccion {
     private int intentosValidacion;
     private int cantidadTransaccionesSinComision;
     private int longitudPalabraAleatoria;
+    private String codigoCuenta; // Atributo para el código de cuenta
 
-    public Transaccion(String tipo, int monto) {
+    public Transaccion(String tipo, double monto, String codigoCuenta) {
         this.porcentajeComision = 2.00;
         this.tipo = tipo;
+        this.monto = monto;
+        this.codigoCuenta = codigoCuenta; // Asigna el código de cuenta
         this.fecha = LocalDateTime.now();
         longitudPalabraAleatoria = 7;
-    
     }
 
-    public int realizarRetiro(int montoRetiro, int saldo) {
+    public double realizarRetiro(double montoRetiro, double saldo) {
         if (validarRetiro(montoRetiro, saldo)) {
-            if (this.comision == true) {
-                return (int) (saldo - montoDepositoComision);
+            if (this.comision) {
+                montoRetiroComision = montoRetiro * (1 + porcentajeComision / 100);
+                return saldo - montoRetiroComision;
             } else {
                 return saldo - montoRetiro;
             }
         } else {
-            return saldo;
+            return saldo; // No se puede realizar el retiro, se devuelve el saldo actual.
         }
     }
 
-    private boolean validarRetiro(int montoRetiro, int saldo) {
+    private boolean validarRetiro(double montoRetiro, double saldo) {
         if (validarAplicacionDeComision()) {
             montoRetiroComision = montoRetiro * (porcentajeComision / 100);
-            if (montoRetiroComision > saldo) {
-                return false;
-            } else {
-                return true;
-            }
+            return montoRetiroComision <= saldo;
         } else {
-            if (montoRetiro > saldo) {
-                return false;
-            } else {
-                return true;
-            }
+            return montoRetiro <= saldo;
         }
     }
 
@@ -81,6 +76,33 @@ public class Transaccion {
         return palabra.toString();
     }
 
-    
+    // Getters
+    public LocalDateTime getFecha() {
+        return fecha;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public double getMonto() {
+        return monto;
+    }
+
+    public boolean isComision() {
+        return comision;
+    }
+
+    public double getMontoRetiroComision() {
+        return montoRetiroComision;
+    }
+
+    public double getMontoDepositoComision() {
+        return montoDepositoComision;
+    }
+
+    public String getCodigoCuenta() {
+        return codigoCuenta;
+    }
 
 }

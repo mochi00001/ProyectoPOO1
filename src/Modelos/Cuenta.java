@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Random;
 import java.util.regex.Pattern;
+import java.util.Objects;
+
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -17,39 +19,26 @@ public class Cuenta {
     private static int cantidadCuentas;
     private LocalDate fechaCreacion;
     private String estatus;
-    private int saldo;
+    private double saldo;
     private String pin;
-    private int sumaRetiros;
-    private int sumaDepositos;
-    private String pinEncriptado;
-    private int usosPin;
     private Cliente miCliente;
     private ArrayList<Transaccion> transacciones;
-    private int intentosValidacion;
-
-<<<<<<< HEAD
-    public Cuenta(int saldo, String pin, Cliente cliente) {
-        codigo = "cta-" + cantidadCuentas;
-        cantidadCuentas++;
-=======
-    // Constructor completo para cargar desde XML
-    public Cuenta(String codigo, Date fechaCreacion, int saldo, String pin, String estatus) {
-        this.codigo = codigo;
-        this.fechaCreacion = fechaCreacion;
-        this.saldo = saldo;
-        this.pin = pin;
-        this.estatus = estatus;
-        this.transacciones = new ArrayList<>();
-    }
     
-    public Cuenta(int saldo, String pin) {
->>>>>>> 64096002d68718c9433009b916ba0de47ecfc64e
+    private int intentosValidacion;
+    private int usosPin;
+    private String pinEncriptado;
+    private int sumaRetiros;
+
+    public Cuenta(double saldo, String pin, Cliente cliente) {
+        this.codigo = "cta-" + cantidadCuentas++;
         this.saldo = saldo;
         this.pin = pin;
-        miCliente = cliente;
-        transacciones = new ArrayList<>();
-        estatus = "Activa";
-        usosPin = 0;
+        this.miCliente = cliente;
+        this.transacciones = new ArrayList<>();
+        this.estatus = "Activa";
+        this.fechaCreacion = LocalDate.now();
+        //this.pinEncriptado = encriptarPin(pin);
+        //System.out.println("Cuenta creada: " + codigo + ", PIN encriptado: " + pinEncriptado);
     }
 
     // Getters y Setters
@@ -57,8 +46,12 @@ public class Cuenta {
         return codigo;
     }
 
-    public int getSaldo() {
+    public double getSaldo() {
         return saldo;
+    }
+    
+    public String getSaldoFormateado() {
+        return String.format("%.2f", saldo);
     }
 
     public void setSaldo(int pSaldo) {
@@ -69,8 +62,31 @@ public class Cuenta {
         return estatus;
     }
 
+    public Cliente getMiCliente() {
+        return miCliente;
+    }
+
+    public String getPin() {
+        return this.pin; // Asegúrate de que 'pin' esté correctamente definido en la clase
+    }
+
+    public void setPin(String nuevoPin) {
+        this.pin = nuevoPin; // Asigna el nuevo PIN
+        //this.pinEncriptado = encriptarPin(nuevoPin); // Encripta el nuevo PIN
+    }
+
     public ArrayList<Transaccion> getTransacciones() {
         return transacciones;
+    }
+
+    public ArrayList<Transaccion> obtenerTransaccionesPorCodigo(String codigoCuenta) {
+        ArrayList<Transaccion> transaccionesPorCodigo = new ArrayList<>();
+        for (Transaccion transaccion : transacciones) {
+            if (transaccion.getCodigoCuenta().equals(codigoCuenta)) {
+                transaccionesPorCodigo.add(transaccion);
+            }
+        }
+        return transaccionesPorCodigo;
     }
 
     // Funcionalidades
@@ -98,11 +114,7 @@ public class Cuenta {
     }
 
     private boolean validarCambioPin(String pinActual, String pinNuevo) {
-        if (!pinActual.equals(pinNuevo)) {
-            return true;
-        } else {
-            return false;
-        }
+        return !pinActual.equals(pinNuevo);
     }
 
     private boolean validarPin(String pin) {
@@ -126,15 +138,23 @@ public class Cuenta {
     }
 
     public boolean validarIngreso(String pinIngresado) {
-        while (usosPin <= 3) {
-            if (pinIngresado.compareTo(pin) == 0) {
-                usosPin = 0;
+        try {
+            String pinEncriptadoIngresado = encriptarPin(pinIngresado); // Encriptar el PIN ingresado
+    
+            if (pinEncriptadoIngresado.equals(pinEncriptado)) { // Comparar con el PIN encriptado
+                usosPin = 0; // Reiniciar el contador si el PIN es correcto
                 return true;
+            } else {
+                usosPin++;
+                if (usosPin >= 3) {
+                    bloquearCuenta(); // Bloquear cuenta si se alcanzan 3 intentos fallidos
+                }
+                return false; // PIN incorrecto
             }
-            usosPin++;
+        } catch (Exception e) {
+            System.err.println("Error al validar el PIN: " + e.getMessage());
+            return false; // Manejo de excepción
         }
-        bloquearCuenta();
-        return false;
     }
 
     public String getPinEncriptado() {
@@ -171,6 +191,11 @@ public class Cuenta {
     }
 
     private boolean validarFormatoPin(String pin) {
+        // Verificar que el PIN no sea nulo y tenga longitud 6
+        if (pin == null || pin.length() != 6) {
+            return false;
+        }
+
         // Expresión regular para validar el PIN
         String regex = "^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{6}$";
         Pattern pattern = Pattern.compile(regex);
@@ -204,4 +229,16 @@ public class Cuenta {
         return codigo.toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Cuenta)) return false;
+        Cuenta otraCuenta = (Cuenta) obj;
+        return this.codigo.equals(otraCuenta.codigo); // O cualquier otro identificador único
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(codigo); // Asegúrate de que 'codigo' es único para cada cuenta
+    }
 }
