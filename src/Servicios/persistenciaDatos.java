@@ -137,12 +137,4 @@ public class PersistenciaDatos {
         }
         return transacciones;
     }
-}    
-    
-
-
-
-
-
-    
-    
+}      

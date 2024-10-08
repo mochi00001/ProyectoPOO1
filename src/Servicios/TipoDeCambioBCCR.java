@@ -3,130 +3,73 @@ package servicios;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class TipoDeCambioBCCR {
-
-    // URL del Banco Central de Costa Rica
     private static final String BCCR_URL = "https://gee.bccr.fi.cr/indicadoreseconomicos/Cuadros/frmVerCatCuadro.aspx?idioma=1&CodCuadro=400";
+    
+    private static String tipoCambioCompra;
+    private static String tipoCambioVenta;
 
-    public static void main(String[] args) {
-        double tipoCompra = obtenerTipoCambioCompra();
-        double tipoVenta = obtenerTipoCambioVenta();
+    public static void obtenerTipoCambioHoy() {
+        try {
+            Document document = Jsoup.connect(BCCR_URL).get();
+            LocalDate fechaHoy = LocalDate.now();
+            String fechaHoyStr = fechaHoy.format(DateTimeFormatter.ofPattern("d MMM yyyy")).replace(".", "").toLowerCase();
+            Elements celdas = document.select("td.celda400");
 
-        if (tipoCompra != -1 && tipoVenta != -1) {
-            System.out.println("Tipo de Cambio de Compra: " + tipoCompra);
-            System.out.println("Tipo de Cambio de Venta: " + tipoVenta);
-        } else {
-            System.out.println("Hubo un error al obtener el tipo de cambio.");
+            int indexFecha = -1;
+
+            for (int i = 0; i < celdas.size(); i++) {
+                String textoCelda = celdas.get(i).text().toLowerCase();
+                if (textoCelda.equals(fechaHoyStr)) {
+                    indexFecha = i;
+                    break;
+                }
+            }
+
+            if (indexFecha != -1) {
+                int indexCompra = indexFecha + indexFecha + 1;
+                if (indexCompra < celdas.size()) {
+                    tipoCambioCompra = celdas.get(indexCompra).text();
+                }
+                int indexVenta = indexFecha + indexFecha + indexFecha + 2;
+                if (indexVenta < celdas.size()) {
+                    tipoCambioVenta = celdas.get(indexVenta).text();
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error al conectarse a la página: " + e.getMessage());
         }
     }
 
-    /**
-     * Método para obtener el tipo de cambio de compra del día actual desde
-     * la página del BCCR.
-     * 
-     * @return El tipo de cambio de compra como un double, o -1 en caso de error.
-     */
     public static double obtenerTipoCambioCompra() {
-        try {
-            Document document = Jsoup.connect(BCCR_URL).get();
-            Elements celdas = document.select("td.celda400");
-
-            // Formatear la fecha actual
-            LocalDate fechaHoy = LocalDate.now();
-            String fechaHoyStr = fechaHoy.format(DateTimeFormatter.ofPattern("d MMM yyyy", new Locale("es", "ES")))
-                    .toLowerCase();
-
-            int indexFecha = obtenerIndiceFecha(celdas, fechaHoyStr);
-            int totalFechas = contarFechas(celdas);
-            int indiceCompra = indexFecha + totalFechas;
-
-            if (indiceCompra < celdas.size()) {
-                String tipoCambioCompraStr = celdas.get(indiceCompra).text().replace(",", ".");
-                return Double.parseDouble(tipoCambioCompraStr);
-            } else {
-                System.out.println("Error: No se encontró el índice adecuado para el tipo de cambio de compra.");
-                return -1;
+        if (tipoCambioCompra != null) {
+            try {
+                // Reemplazar la coma con un punto para asegurar que el formato sea compatible
+                String tipoCambioFormateado = tipoCambioCompra.replace(",", ".");
+                return Double.parseDouble(tipoCambioFormateado);
+            } catch (NumberFormatException e) {
+                System.err.println("Error al convertir el tipo de cambio de compra a número: " + e.getMessage());
             }
-        } catch (IOException e) {
-            System.err.println("Error al conectarse a la página: " + e.getMessage());
-            return -1;
+        } else {
+            System.err.println("El tipo de cambio de compra es nulo.");
         }
+        return 0; // O lanza una excepción si prefieres manejar el error de otra forma
     }
 
-    /**
-     * Método para obtener el tipo de cambio de venta del día actual desde
-     * la página del BCCR.
-     * 
-     * @return El tipo de cambio de venta como un double, o -1 en caso de error.
-     */
     public static double obtenerTipoCambioVenta() {
-        try {
-            Document document = Jsoup.connect(BCCR_URL).get();
-            Elements celdas = document.select("td.celda400");
-
-            // Formatear la fecha actual
-            LocalDate fechaHoy = LocalDate.now();
-            String fechaHoyStr = fechaHoy.format(DateTimeFormatter.ofPattern("d MMM yyyy", new Locale("es", "ES")))
-                    .toLowerCase();
-
-            int indexFecha = obtenerIndiceFecha(celdas, fechaHoyStr);
-            int totalFechas = contarFechas(celdas);
-            int indiceVenta = indexFecha + (2 * totalFechas);
-
-            if (indiceVenta < celdas.size()) {
-                String tipoCambioVentaStr = celdas.get(indiceVenta).text().replace(",", ".");
-                return Double.parseDouble(tipoCambioVentaStr);
-            } else {
-                System.out.println("Error: No se encontró el índice adecuado para el tipo de cambio de venta.");
-                return -1;
-            }
-        } catch (IOException e) {
-            System.err.println("Error al conectarse a la página: " + e.getMessage());
-            return -1;
-        }
-    }
-
-    /**
-     * Método para obtener el índice de la fecha actual en la tabla.
-     * 
-     * @param celdas      Las celdas de la tabla HTML.
-     * @param fechaHoyStr La fecha actual como cadena de texto.
-     * @return El índice de la fecha actual o -1 si no se encuentra.
-     */
-    private static int obtenerIndiceFecha(Elements celdas, String fechaHoyStr) {
-        for (int i = 0; i < celdas.size(); i++) {
-            String textoCelda = celdas.get(i).text().toLowerCase();
-            if (textoCelda.equals(fechaHoyStr)) {
-                return i;
+        if (tipoCambioVenta != null) {
+            try {
+                // Reemplazar la coma con un punto para asegurar que el formato sea compatible
+                String tipoCambioFormateado = tipoCambioVenta.replace(",", ".");
+                return Double.parseDouble(tipoCambioFormateado);
+            } catch (NumberFormatException e) {
+                System.err.println("Error al convertir el tipo de cambio de venta a número: " + e.getMessage());
             }
         }
-        return -1; // No se encontró la fecha
-    }
-
-    /**
-     * Método para contar cuántas fechas hay en la tabla.
-     */
-    private static int contarFechas(Elements celdas) {
-        int contador = 0;
-        Pattern patronFecha = Pattern.compile("^\\d{1,2} [a-z]{3} \\d{4}$"); // Regex para validar fechas con 1 o 2
-                                                                             // dígitos para el día
-
-        for (Element celda : celdas) {
-            String texto = celda.text().toLowerCase();
-            Matcher matcher = patronFecha.matcher(texto);
-            if (matcher.matches()) {
-                contador++;
-            }
-        }
-        return contador;
+        return 0; // O lanza una excepción si prefieres manejar el error de otra forma
     }
 }
