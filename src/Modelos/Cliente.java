@@ -1,7 +1,9 @@
 package modelos;
 
-import java.util.ArrayList;
+import validacion.Formato;
+
 import java.util.List;
+import java.util.ArrayList;
 
 public class Cliente {
     private String nombre;
@@ -22,7 +24,24 @@ public class Cliente {
         this.identificacion = identificacion;
     }
 
-    // Getters y setters
+    //Funcionalidades
+    public List<Cuenta> getMisCuentas() {
+        return misCuentas;
+    }
+
+    public void agregarCuenta(Cuenta cuenta) {
+        misCuentas.add(cuenta);
+    }
+
+        // Método para listar las cuentas asociadas a este cliente
+    public void mostrarCuentas() {
+        System.out.println("Cuentas asociadas al cliente " + nombre + " (ID: " + identificacion + "):");
+        for (Cuenta cuenta : misCuentas) {
+            System.out.println("Cuenta: " + cuenta.getCodigo() + ", Saldo: " + cuenta.getSaldo());
+        }
+    }
+
+    // Getters y Setters
     public String getNombre() {
         return nombre;
     }
@@ -36,6 +55,9 @@ public class Cliente {
     }
 
     public void setNumTelefono(String numTelefono) {
+        if (!Formato.validarTelefono(numTelefono)) {
+            throw new IllegalArgumentException("Número de teléfono inválido.");
+        }
         this.numTelefono = numTelefono;
     }
 
@@ -47,33 +69,15 @@ public class Cliente {
         this.correoElectronico = correoElectronico;
     }
 
-    public List<Cuenta> getMisCuentas() {
-        return misCuentas; // Devuelve como List
+    // Sobreescritura del método
+    @Override
+    public String toString() {
+        return "Cliente{" +
+                "nombre='" + nombre + '\'' +
+                ", identificacion=" + identificacion +
+                ", numTelefono='" + numTelefono + '\'' +
+                ", correoElectronico='" + correoElectronico + '\'' +
+                ", misCuentas=" + misCuentas.size() + " cuentas" +
+                '}';
     }
-
-    private boolean validarIdentificacion(int pIdentificacion) {
-        if (identificacion.equals(String.valueOf(pIdentificacion))) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    public void crearCuenta(int saldo, String pin, Cliente cliente) {
-        Cuenta cuenta = new Cuenta(saldo, pin, cliente);
-        misCuentas.add(cuenta);
-    }
-
-    public void agregarCuenta(Cuenta cuenta) {
-        misCuentas.add(cuenta);
-    }
-
-    // Método para listar las cuentas asociadas a este cliente
-    public void mostrarCuentas() {
-        System.out.println("Cuentas asociadas al cliente " + nombre + " (ID: " + identificacion + "):");
-        for (Cuenta cuenta : misCuentas) {
-            System.out.println("Cuenta: " + cuenta.getCodigo() + ", Saldo: " + cuenta.getSaldo());
-        }
-    }
-
 }

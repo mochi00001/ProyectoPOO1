@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<transacciones>
+    <transaccion>
+        <fecha>2024-10-07 00:08:23</fecha>
+        <tipo>Depósito en Colones</tipo>
+        <monto>1000</monto>
+        <comision>false</comision>
+        <montoRetiroComision>0.0</montoRetiroComision>
+        <montoDepositoComision>0.0</montoDepositoComision>
+        <numeroCuenta>cta-0</numeroCuenta>
+    </transaccion>
+</transacciones>
