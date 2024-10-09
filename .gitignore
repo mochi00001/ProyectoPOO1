@@ -1,0 +1,18 @@
+# Ignorar archivos binarios y compilados
+bin/
+target/
+*.class
+
+# Ignorar archivos de configuración específicos del IDE
+.idea/
+.vscode/
+*.iml
+*.log
+
+# Ignorar archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar archivos temporales
+*.tmp
+*.swp
