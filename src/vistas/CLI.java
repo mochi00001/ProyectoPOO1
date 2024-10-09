@@ -877,7 +877,7 @@ public class CLI {
 
     private void consultarTipoCambioCompra() {
         // Llamar al método para obtener el tipo de cambio
-        // TipoDeCambioBCCR.obtenerTipoCambioHoy();
+        TipoDeCambioBCCR.obtenerTipoCambioHoy();
 
         double tipoCambioCompra = TipoDeCambioBCCR.obtenerTipoCambioCompra();
 
@@ -891,7 +891,7 @@ public class CLI {
 
     private void consultarTipoCambioVenta() {
         // Llamar al método para obtener el tipo de cambio
-        // TipoDeCambioBCCR.obtenerTipoCambioHoy();
+        TipoDeCambioBCCR.obtenerTipoCambioHoy();
 
         double tipoCambioVenta = TipoDeCambioBCCR.obtenerTipoCambioVenta();
 
