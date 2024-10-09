@@ -554,34 +554,40 @@ public class GUI {
     }
 
     private void realizarRetiro() {
+        // Solicitar el número de cuenta al usuario
         String numeroCuenta = JOptionPane.showInputDialog("Ingrese número de cuenta:");
-        double monto;
+        
+        double monto; // Variable para el monto a retirar
         boolean esDolar = false; // Por defecto, asumimos que es en colones.
     
-        // Preguntar al usuario si el retiro es en dólares.
+        // Preguntar al usuario si el retiro es en dólares
         int respuesta = JOptionPane.showConfirmDialog(frame, "¿Desea realizar un retiro en dólares?", "Selección de moneda", JOptionPane.YES_NO_OPTION);
         if (respuesta == JOptionPane.YES_OPTION) {
             esDolar = true; // Si el usuario selecciona "Sí", se establece que es en dólares.
         }
     
+        // Solicitar el monto a retirar y manejar posibles errores
         try {
             monto = Double.parseDouble(JOptionPane.showInputDialog("Ingrese monto a retirar:"));
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(frame, "Error: El monto debe ser un número.");
-            return;
+            return; // Salir del método si la entrada es inválida
         }
-        
+    
+        // Solicitar el PIN del cliente
         String pinCliente = JOptionPane.showInputDialog("Ingrese PIN del cliente:");
     
-        // Aquí se llama al método realizarRetiro con el nuevo parámetro esDolar.
+        // Llamar al método realizarRetiro en el controlador de transacciones
         boolean resultado = transaccionesControlador.realizarRetiro(numeroCuenta, pinCliente, monto, esDolar);
+    
+        // Mostrar el resultado al usuario
         if (resultado) {
             JOptionPane.showMessageDialog(frame, "Retiro realizado exitosamente.");
         } else {
             JOptionPane.showMessageDialog(frame, "Error: No se pudo realizar el retiro. Verifique el número de cuenta y saldo disponible.");
         }
     }
-    
+     
     private void realizarTransferencia() {
         String numeroCuentaOrigen = JOptionPane.showInputDialog("Ingrese número de cuenta origen:");
         String pinCliente = JOptionPane.showInputDialog("Ingrese PIN del cliente:");

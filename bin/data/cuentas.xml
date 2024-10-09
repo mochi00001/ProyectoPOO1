@@ -5,5 +5,55 @@
         <estatus>Activa</estatus>
         <saldo>9000.00</saldo>
         <identificacion>305260528</identificacion>
+        <pin>cta-0</pin>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-1</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>100000.00</saldo>
+        <identificacion>123456789</identificacion>
+        <pin>cta-1</pin>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-2</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>1000000.00</saldo>
+        <identificacion>123456789</identificacion>
+        <pin>cta-2</pin>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-3</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>10000000.00</saldo>
+        <identificacion>987654321</identificacion>
+        <pin>cta-3</pin>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-4</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>9000000000.00</saldo>
+        <identificacion>192837465</identificacion>
+        <pin>cta-4</pin>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-5</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>303030.00</saldo>
+        <identificacion>305260528</identificacion>
+        <pin>cta-5</pin>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-6</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>999.00</saldo>
+        <identificacion>305260528</identificacion>
+        <pin>cta-6</pin>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-7</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>40404.00</saldo>
+        <identificacion>305260528</identificacion>
+        <pin>Fer123</pin>
     </cuenta>
 </cuentas>

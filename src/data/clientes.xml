@@ -18,4 +18,22 @@
         <numTelefono>+50687068702</numTelefono>
         <correoElectronico>maluisa-40@hotmail.com</correoElectronico>
     </cliente>
+    <cliente>
+        <nombre>Fernanda</nombre>
+        <identificacion>123456789</identificacion>
+        <numTelefono>+50687068702</numTelefono>
+        <correoElectronico>fernandasperez1@gmail.com</correoElectronico>
+    </cliente>
+    <cliente>
+        <nombre>987654321</nombre>
+        <identificacion>987654321</identificacion>
+        <numTelefono>+50687068702</numTelefono>
+        <correoElectronico>fernandasperez1@gmail.com</correoElectronico>
+    </cliente>
+    <cliente>
+        <nombre>hola</nombre>
+        <identificacion>192837465</identificacion>
+        <numTelefono>+50687068702</numTelefono>
+        <correoElectronico>fernandasperez1@gmail.com</correoElectronico>
+    </cliente>
 </clientes>

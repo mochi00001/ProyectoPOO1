@@ -70,7 +70,7 @@ public class CuentaControlador {
                 throw new IllegalArgumentException("El PIN no cumple con el formato requerido.");
             }
             String numeroCuenta = "cta-" + cuentas.size(); // Generar número de cuenta único
-            Cuenta nuevaCuenta = new Cuenta(saldoInicial, pin, cliente);
+            Cuenta nuevaCuenta = new Cuenta(saldoInicial, numeroCuenta, pin, cliente);
             nuevaCuenta.setPinEncriptado(nuevaCuenta.encriptarPin(pin));
             cliente.getMisCuentas().add(nuevaCuenta);
             cuentas.add(nuevaCuenta); // Añadir la nueva cuenta a la lista
@@ -127,6 +127,20 @@ public class CuentaControlador {
             System.err.println("Error al cambiar el PIN: " + e.getMessage());
             return false; // Indicar que hubo un error
         }
+    }
+
+    // Método para obtener códigos y PINs de todas las cuentas
+    public List<String[]> obtenerCodigosYPins() {
+        List<String[]> codigosYPins = new ArrayList<>();
+        
+        for (Cuenta cuenta : cuentas) {
+            String[] codigoYPin = new String[2];
+            codigoYPin[0] = cuenta.getCodigo(); // Obtén el código de la cuenta
+            codigoYPin[1] = cuenta.getPin();    // Obtén el PIN (si es que está accesible)
+            codigosYPins.add(codigoYPin);
+        }
+        
+        return codigosYPins; // Retorna la lista de códigos y PINs
     }
     
 }

@@ -112,6 +112,7 @@ public class XMLUtils {
 
 
     // Método para escribir cuentas a un archivo XML
+    // Método para escribir cuentas a un archivo XML
     public static void escribirCuentasAArchivoXML(List<Cuenta> listaCuentas, String rutaArchivo) {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -141,7 +142,11 @@ public class XMLUtils {
                 Element identificacion = doc.createElement("identificacion");
                 identificacion.appendChild(doc.createTextNode(String.valueOf(cuenta.getMiCliente().getIdentificacion())));
                 cuentaElement.appendChild(identificacion);
-
+                
+                // Agregar el PIN de la cuenta
+                Element pin = doc.createElement("pin");
+                pin.appendChild(doc.createTextNode(cuenta.getPin())); // Agregar el PIN
+                cuentaElement.appendChild(pin);
             }
 
             // Escribir el contenido en el archivo XML
@@ -157,6 +162,7 @@ public class XMLUtils {
             e.printStackTrace();
         }
     }
+
 
 
     // Método para leer cuentas a un archivo XML
@@ -181,6 +187,8 @@ public class XMLUtils {
                     String estatus = elementoCuenta.getElementsByTagName("estatus").item(0).getTextContent();
                     String saldoFormateado = elementoCuenta.getElementsByTagName("saldo").item(0).getTextContent();
                     double saldo = Double.parseDouble(saldoFormateado);
+
+                    String pin = elementoCuenta.getElementsByTagName("pin").item(0).getTextContent();
     
                     int identificacion = Integer.parseInt(elementoCuenta.getElementsByTagName("identificacion").item(0).getTextContent());
     
@@ -195,7 +203,7 @@ public class XMLUtils {
                     }
     
                     // Crear el objeto Cuenta con la información leída del archivo XML
-                    Cuenta cuenta = new Cuenta(saldo, numeroCuenta, cliente);
+                    Cuenta cuenta = new Cuenta(saldo, numeroCuenta, pin, cliente);
                     listaCuentas.add(cuenta);
     
                     // Si el cliente existe, agregar la cuenta a la lista de cuentas del cliente

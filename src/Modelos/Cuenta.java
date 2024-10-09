@@ -30,9 +30,10 @@ public class Cuenta {
     private int usosPin = 0;
     private String pinEncriptado;
     private double sumaRetiros = 0; //Verificar uso
+    public static int cantidadTransacciones = 0;
 
 
-    public Cuenta(double saldo, String pin, Cliente cliente) {
+    public Cuenta(double saldo, String codigo, String pin, Cliente cliente) {
         this.codigo = "cta-" + cantidadCuentas++;
         this.saldo = saldo;
         this.pin = pin;
@@ -40,9 +41,6 @@ public class Cuenta {
         this.transacciones = new ArrayList<>();
         this.estatus = "Activa";
         this.fechaCreacion = LocalDate.now();
-        //this.pinEncriptado = encriptarPin(pin);
-        //System.out.println("Cuenta creada: " + codigo + ", PIN encriptado: " + pinEncriptado);
-        this.transacciones = new ArrayList<>();
     }
 
     // Funcionalidades
@@ -59,7 +57,6 @@ public class Cuenta {
         }
         return transaccionesPorCodigo;
     }
-
     
 
     // Getters y Setters
@@ -101,12 +98,14 @@ public class Cuenta {
 
     // Funcionalidades
     public void realizarDeposito(double cantidad) {
-        if (cantidad <= 0) {
-            throw new IllegalArgumentException("La cantidad a depositar debe ser positiva.");
+        if(validarEstatus()){
+            if (cantidad <= 0) {
+                throw new IllegalArgumentException("La cantidad a depositar debe ser positiva.");
+            }
+            this.saldo += cantidad;
+            cantidadTransacciones++; // Aumentar el saldo con la cantidad depositada
+            // Puedes agregar un mensaje para depuración
         }
-        this.saldo += cantidad; // Aumentar el saldo con la cantidad depositada
-        // Puedes agregar un mensaje para depuración
-        System.out.println("Depósito realizado: " + cantidad + " en la cuenta " + this.codigo);
     }
     
 
@@ -114,17 +113,17 @@ public class Cuenta {
         String tipo = "Retiro";
         if (validarEstatus()) {
             // Asegúrate de pasar el código de cuenta al crear la transacción
-            Transaccion nuevaTransaccion = new Transaccion(tipo, pMonto, this.codigo);
-            transacciones.add(nuevaTransaccion);
-            
             MensajeSMS mensajeCodigo = new MensajeSMS();
             boolean mensaje = mensajeCodigo.enviarMensajeVerificacion(miCliente.getNumTelefono(),
                     generarCodigoAleatorio());
             if (mensaje) {
                 while (intentosValidacion <= 3) {
                     if (mensajeCodigo.verificarCodigo(pCodigo)) {
+                        Transaccion nuevaTransaccion = new Transaccion(tipo, pMonto, this.codigo);
+                        transacciones.add(nuevaTransaccion);
                         nuevaTransaccion.realizarRetiro(pMonto, saldo);
                         sumaRetiros += pMonto;
+                        cantidadTransacciones++;
                         break;
                     } else {
                         intentosValidacion += 1;

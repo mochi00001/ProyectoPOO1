@@ -33,11 +33,6 @@ public class Transaccion {
         }
     }
 
-    // Método para realizar un depósito y calcular el nuevo saldo
-    public double realizarDeposito(double montoDeposito, double saldo) {
-        return saldo + montoDeposito; // Sumar el monto del depósito al saldo.
-    }
-
     // Método para verificar si hay una comisión
     public boolean isComision() {
         return montoComision > 0; // Retorna verdadero si hay una comisión calculada
