@@ -68,8 +68,6 @@ public class TransaccionesControlador {
         }
     }
     
-
-    
     // Método para realizar un depósito en dólares, convierte a colones usando el tipo de cambio
     public boolean realizarDepositoDolares(String numeroCuenta, double montoDolares, double tipoCambioCompra) {
         System.out.println("Valor de tipoCambioCompra: " + tipoCambioCompra);
