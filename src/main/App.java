@@ -1,11 +1,16 @@
 package main;
 
-import java.util.List;
-
 import controladores.ClienteControlador;
 import controladores.CuentaControlador;
 import controladores.TransaccionesControlador;
 import vistas.CLI;
+import vistas.GUI;
+
+import java.util.List;
+
+import modelos.Cliente;
+import modelos.Cuenta;
+import servicios.PersistenciaDatos;
 // import vistas.GUI; // Descomentar si se va a usar la GUI
 
 /**
@@ -15,28 +20,19 @@ import vistas.CLI;
  */
 
 public class App {
+
     public static void main(String[] args) {
-        CuentaControlador cuentaControlador = new CuentaControlador();
-        ClienteControlador clienteControlador = new ClienteControlador(cuentaControlador);
-        TransaccionesControlador transaccionesControlador = new TransaccionesControlador();
+        ClienteControlador clienteControlador = new ClienteControlador();
+        CuentaControlador cuentaControlador = new CuentaControlador(clienteControlador);
+        TransaccionesControlador transaccionesControlador = new TransaccionesControlador(cuentaControlador);
 
         // Inicializa la aplicación con CLI
-        iniciarCLI(cuentaControlador, clienteControlador, transaccionesControlador);
+        //iniciarCLI(cuentaControlador, clienteControlador, transaccionesControlador);
 
         // Inicializa la aplicación con GUI (Descomentar para usar GUI)
-        // iniciarGUI(controlador);
+        iniciarGUI(cuentaControlador, clienteControlador, transaccionesControlador);
     }
-
-    /**
-     * Método para inicializar la aplicación con la interfaz de línea de comandos
-     * (CLI).
-     */
-    private static void iniciarCLI(CuentaControlador cuentaControlador, ClienteControlador clienteControlador,
-            TransaccionesControlador transaccionesControlador) {
-        CLI cli = new CLI(clienteControlador, cuentaControlador, transaccionesControlador);
-        cli.iniciar();
-    }
-
+    
     /**
      * Método para inicializar la aplicación con la interfaz gráfica de usuario
      * (GUI).
