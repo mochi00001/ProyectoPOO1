@@ -1,16 +1,11 @@
 package servicios;
 
-import modelos.Cliente;
-import modelos.Cuenta;
-import modelos.Transaccion;
-
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import controladores.ClienteControlador;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,12 +16,16 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.ArrayList;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import controladores.ClienteControlador;
+import modelos.Cliente;
+import modelos.Cuenta;
+import modelos.Transaccion;
 
 public class XMLUtils {
 
@@ -94,9 +93,11 @@ public class XMLUtils {
                 if (nodo.getNodeType() == Node.ELEMENT_NODE) {
                     Element elementoCliente = (Element) nodo;
                     String nombre = elementoCliente.getElementsByTagName("nombre").item(0).getTextContent();
-                    int identificacion = Integer.parseInt(elementoCliente.getElementsByTagName("identificacion").item(0).getTextContent());
+                    int identificacion = Integer
+                            .parseInt(elementoCliente.getElementsByTagName("identificacion").item(0).getTextContent());
                     String numTelefono = elementoCliente.getElementsByTagName("numTelefono").item(0).getTextContent();
-                    String correoElectronico = elementoCliente.getElementsByTagName("correoElectronico").item(0).getTextContent();
+                    String correoElectronico = elementoCliente.getElementsByTagName("correoElectronico").item(0)
+                            .getTextContent();
 
                     // Crear el objeto Cliente con los datos obtenidos del XML
                     Cliente cliente = new Cliente(nombre, identificacion, numTelefono, correoElectronico);
@@ -109,7 +110,6 @@ public class XMLUtils {
 
         return listaClientes;
     }
-
 
     // Método para escribir cuentas a un archivo XML
     // Método para escribir cuentas a un archivo XML
@@ -140,9 +140,10 @@ public class XMLUtils {
                 cuentaElement.appendChild(saldo);
 
                 Element identificacion = doc.createElement("identificacion");
-                identificacion.appendChild(doc.createTextNode(String.valueOf(cuenta.getMiCliente().getIdentificacion())));
+                identificacion
+                        .appendChild(doc.createTextNode(String.valueOf(cuenta.getMiCliente().getIdentificacion())));
                 cuentaElement.appendChild(identificacion);
-                
+
                 // Agregar el PIN de la cuenta
                 Element pin = doc.createElement("pin");
                 pin.appendChild(doc.createTextNode(cuenta.getPin())); // Agregar el PIN
@@ -163,49 +164,50 @@ public class XMLUtils {
         }
     }
 
-
-
     // Método para leer cuentas a un archivo XML
     // Método para leer cuentas desde un archivo XML
     public static List<Cuenta> leerCuentasDesdeArchivoXML(String rutaArchivo, ClienteControlador clienteControlador) {
         List<Cuenta> listaCuentas = new ArrayList<>();
-    
+
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.parse(new File(rutaArchivo));
-    
+
             NodeList listaNodosCuenta = doc.getElementsByTagName("cuenta");
-    
+
             for (int i = 0; i < listaNodosCuenta.getLength(); i++) {
                 Node nodoCuenta = listaNodosCuenta.item(i);
-    
+
                 if (nodoCuenta.getNodeType() == Node.ELEMENT_NODE) {
                     Element elementoCuenta = (Element) nodoCuenta;
-    
+
                     String numeroCuenta = elementoCuenta.getElementsByTagName("numeroCuenta").item(0).getTextContent();
                     String estatus = elementoCuenta.getElementsByTagName("estatus").item(0).getTextContent();
                     String saldoFormateado = elementoCuenta.getElementsByTagName("saldo").item(0).getTextContent();
                     double saldo = Double.parseDouble(saldoFormateado);
 
                     String pin = elementoCuenta.getElementsByTagName("pin").item(0).getTextContent();
-    
-                    int identificacion = Integer.parseInt(elementoCuenta.getElementsByTagName("identificacion").item(0).getTextContent());
-    
+
+                    int identificacion = Integer
+                            .parseInt(elementoCuenta.getElementsByTagName("identificacion").item(0).getTextContent());
+
                     // Buscar el cliente en el ClienteControlador utilizando la identificación
-                    Optional<Cliente> optionalCliente = clienteControlador.buscarClientePorIdentificacion(identificacion);
-    
+                    Optional<Cliente> optionalCliente = clienteControlador
+                            .buscarClientePorIdentificacion(identificacion);
+
                     // Obtener el cliente del Optional, o null si no existe
                     Cliente cliente = optionalCliente.orElse(null);
-    
+
                     if (cliente == null) {
-                        System.err.println("Advertencia: Cliente con identificación " + identificacion + " no encontrado. La cuenta no se asociará a ningún cliente.");
+                        System.err.println("Advertencia: Cliente con identificación " + identificacion
+                                + " no encontrado. La cuenta no se asociará a ningún cliente.");
                     }
-    
+
                     // Crear el objeto Cuenta con la información leída del archivo XML
-                    Cuenta cuenta = new Cuenta(saldo, numeroCuenta, pin, cliente);
+                    Cuenta cuenta = new Cuenta(saldo, numeroCuenta, pin, cliente, estatus);
                     listaCuentas.add(cuenta);
-    
+
                     // Si el cliente existe, agregar la cuenta a la lista de cuentas del cliente
                     if (cliente != null) {
                         cliente.getMisCuentas().add(cuenta);
@@ -216,12 +218,9 @@ public class XMLUtils {
             System.err.println("Error al leer el archivo XML: " + e.getMessage());
             e.printStackTrace();
         }
-    
+
         return listaCuentas;
     }
-    
-    
-
 
     // Método para escribir transacciones a un archivo XML
     public static void escribirTransaccionesAArchivoXML(List<Transaccion> transacciones, String rutaArchivo) {
@@ -253,11 +252,13 @@ public class XMLUtils {
                 transaccionElement.appendChild(comisionElement);
 
                 Element montoRetiroComisionElement = doc.createElement("montoRetiroComision");
-                montoRetiroComisionElement.appendChild(doc.createTextNode(String.valueOf(transaccion.getMontoRetiroComision())));
+                montoRetiroComisionElement
+                        .appendChild(doc.createTextNode(String.valueOf(transaccion.getMontoRetiroComision())));
                 transaccionElement.appendChild(montoRetiroComisionElement);
 
                 Element montoDepositoComisionElement = doc.createElement("montoDepositoComision");
-                montoDepositoComisionElement.appendChild(doc.createTextNode(String.valueOf(transaccion.getMontoDepositoComision())));
+                montoDepositoComisionElement
+                        .appendChild(doc.createTextNode(String.valueOf(transaccion.getMontoDepositoComision())));
                 transaccionElement.appendChild(montoDepositoComisionElement);
 
                 Element numeroCuentaElement = doc.createElement("numeroCuenta");
@@ -296,13 +297,18 @@ public class XMLUtils {
                 if (transaccionNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element transaccionElement = (Element) transaccionNode;
 
-                    double monto = Double.parseDouble(transaccionElement.getElementsByTagName("monto").item(0).getTextContent());
+                    double monto = Double
+                            .parseDouble(transaccionElement.getElementsByTagName("monto").item(0).getTextContent());
                     String fecha = transaccionElement.getElementsByTagName("fecha").item(0).getTextContent();
                     String tipo = transaccionElement.getElementsByTagName("tipo").item(0).getTextContent();
-                    boolean comision = Boolean.parseBoolean(transaccionElement.getElementsByTagName("comision").item(0).getTextContent());
-                    double montoRetiroComision = Double.parseDouble(transaccionElement.getElementsByTagName("montoRetiroComision").item(0).getTextContent());
-                    double montoDepositoComision = Double.parseDouble(transaccionElement.getElementsByTagName("montoDepositoComision").item(0).getTextContent());
-                    String numeroCuenta = transaccionElement.getElementsByTagName("numeroCuenta").item(0).getTextContent();
+                    boolean comision = Boolean
+                            .parseBoolean(transaccionElement.getElementsByTagName("comision").item(0).getTextContent());
+                    double montoRetiroComision = Double.parseDouble(
+                            transaccionElement.getElementsByTagName("montoRetiroComision").item(0).getTextContent());
+                    double montoDepositoComision = Double.parseDouble(
+                            transaccionElement.getElementsByTagName("montoDepositoComision").item(0).getTextContent());
+                    String numeroCuenta = transaccionElement.getElementsByTagName("numeroCuenta").item(0)
+                            .getTextContent();
 
                     Transaccion transaccion = new Transaccion(tipo, monto, numeroCuenta);
                     transacciones.add(transaccion);

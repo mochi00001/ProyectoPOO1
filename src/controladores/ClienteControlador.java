@@ -1,13 +1,11 @@
 package controladores;
 
-import modelos.Cliente;
-import modelos.Cuenta;
-import servicios.PersistenciaDatos;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import modelos.Cliente;
+import servicios.PersistenciaDatos;
 
 public class ClienteControlador {
 
@@ -32,7 +30,6 @@ public class ClienteControlador {
             return false; // Cliente ya existe
         }
     }
-    
 
     public boolean actualizarTelefono(int identificacion, String nuevoTelefono) {
         Optional<Cliente> clienteOpt = buscarClientePorIdentificacion(identificacion);
@@ -75,7 +72,6 @@ public class ClienteControlador {
         }
         return null;
     }
-    
 
     public List<Cliente> obtenerClientes() {
         return clientes;

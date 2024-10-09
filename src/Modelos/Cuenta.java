@@ -1,22 +1,20 @@
 package modelos;
 
-import servicios.MensajeSMS;
-import servicios.PersistenciaDatos;
-import servicios.CorreoElectronico;
-import validacion.Formato;
-import controladores.ClienteControlador;
-
 import java.time.LocalDate;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 import java.util.Base64;
-import java.util.Random;
+import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import controladores.ClienteControlador;
+import servicios.CorreoElectronico;
+import servicios.MensajeSMS;
+import servicios.PersistenciaDatos;
+import validacion.Formato;
 
 public class Cuenta {
     private String codigo;
@@ -26,14 +24,13 @@ public class Cuenta {
     private double saldo;
     private String pin;
     private Cliente miCliente;
-    private List<Transaccion> transacciones; 
+    private List<Transaccion> transacciones;
 
     private int intentosValidacion = 0;
     private int usosPin = 0;
     private String pinEncriptado;
-    private double sumaRetiros = 0; //Verificar uso
+    private double sumaRetiros = 0; // Verificar uso
     public static int cantidadTransacciones = 0;
-
 
     public Cuenta(double saldo, String codigo, String pin, Cliente cliente) {
         this.codigo = "cta-" + cantidadCuentas++;
@@ -44,7 +41,11 @@ public class Cuenta {
         this.estatus = "Activa";
         this.fechaCreacion = LocalDate.now();
     }
-    
+
+    public Cuenta(double saldo, String codigo, String pin, Cliente cliente, String estatus) {
+        this(saldo, codigo, pin, cliente);
+        this.estatus = estatus;
+    }
 
     // Funcionalidades
     public List<Transaccion> getTransacciones() {
@@ -60,7 +61,6 @@ public class Cuenta {
         }
         return transaccionesPorCodigo;
     }
-    
 
     // Getters y Setters
     public String getCodigo() {
@@ -79,7 +79,6 @@ public class Cuenta {
         return String.format("%.2f", saldo);
     }
 
-
     public String getEstatus() {
         return estatus;
     }
@@ -94,14 +93,12 @@ public class Cuenta {
 
     public void setPin(String nuevoPin) {
         this.pin = nuevoPin; // Asigna el nuevo PIN
-        //this.pinEncriptado = encriptarPin(nuevoPin); // Encripta el nuevo PIN
+        // this.pinEncriptado = encriptarPin(nuevoPin); // Encripta el nuevo PIN
     }
-    
-    
 
     // Funcionalidades
     public void realizarDeposito(double cantidad) {
-        if(validarEstatus()){
+        if (validarEstatus()) {
             if (cantidad <= 0) {
                 throw new IllegalArgumentException("La cantidad a depositar debe ser positiva.");
             }
@@ -110,7 +107,6 @@ public class Cuenta {
             // Puedes agregar un mensaje para depuración
         }
     }
-    
 
     public void agregarRetiro(int pMonto, String pCodigo) {
         String tipo = "Retiro";
@@ -137,12 +133,14 @@ public class Cuenta {
         }
     }
 
-    public void realizarTransaccionEntreCuentas(double monto, Cuenta cuentaDestino, String pCodigo, ClienteControlador clienteControlador) {
+    public void realizarTransaccionEntreCuentas(double monto, Cuenta cuentaDestino, String pCodigo,
+            ClienteControlador clienteControlador) {
         String tipo = "Transferencia";
         if (validarEstatus()) {
             // Enviar mensaje de verificación
             MensajeSMS mensajeCodigo = new MensajeSMS();
-            boolean mensaje = mensajeCodigo.enviarMensajeVerificacion(miCliente.getNumTelefono(), generarCodigoAleatorio());
+            boolean mensaje = mensajeCodigo.enviarMensajeVerificacion(miCliente.getNumTelefono(),
+                    generarCodigoAleatorio());
             if (mensaje) {
                 int intentosValidacion = 0;
                 while (intentosValidacion < 3) {
@@ -151,23 +149,28 @@ public class Cuenta {
                         if (monto <= saldo) {
                             // Realizar la transferencia
                             saldo -= monto; // Resta del saldo de la cuenta origen
-                            cuentaDestino.setSaldo(cuentaDestino.getSaldo() + monto); // Suma al saldo de la cuenta destino
-    
+                            cuentaDestino.setSaldo(cuentaDestino.getSaldo() + monto); // Suma al saldo de la cuenta
+                                                                                      // destino
+
                             // Crear nueva transacción
                             Transaccion nuevaTransaccion = new Transaccion(tipo, monto, this.codigo);
                             transacciones.add(nuevaTransaccion);
                             nuevaTransaccion.setFecha(LocalDate.now());
                             cantidadTransacciones++;
-    
+
                             System.out.println("Transferencia de " + monto + " colones realizada con éxito.");
-    
+
                             // Guardar la nueva transacción
-                            List<Transaccion> transacciones = PersistenciaDatos.cargarTransacciones(); // Cargar transacciones existentes
+                            List<Transaccion> transacciones = PersistenciaDatos.cargarTransacciones(); // Cargar
+                                                                                                       // transacciones
+                                                                                                       // existentes
                             transacciones.add(nuevaTransaccion); // Agregar la nueva transacción
-                            PersistenciaDatos.guardarTransacciones(transacciones); // Guardar la lista actualizada de transacciones
-    
+                            PersistenciaDatos.guardarTransacciones(transacciones); // Guardar la lista actualizada de
+                                                                                   // transacciones
+
                             // Actualizar cuentas en cuentas.xml
-                            List<Cuenta> cuentas = PersistenciaDatos.cargarCuentas(clienteControlador); // Pasar el ClienteControlador
+                            List<Cuenta> cuentas = PersistenciaDatos.cargarCuentas(clienteControlador); // Pasar el
+                                                                                                        // ClienteControlador
                             for (Cuenta cuenta : cuentas) {
                                 if (cuenta.getCodigo().equals(this.codigo)) {
                                     cuenta.setSaldo(this.saldo); // Actualizar saldo de la cuenta origen
@@ -193,11 +196,6 @@ public class Cuenta {
             System.out.println("Error: La cuenta no está activa o tiene restricciones.");
         }
     }
-    
-    
-    
-    
-    
 
     private boolean validarCambioPin(String pinActual, String pinNuevo) {
         return !pinActual.equals(pinNuevo);
@@ -215,6 +213,12 @@ public class Cuenta {
         }
     }
 
+    public void eliminarCuenta() {
+        if (estatus.equals("Activa")) {
+            estatus = "Eliminada";
+        }
+    }
+
     private boolean validarEstatus() {
         if (this.estatus.equals("Activa")) {
             return true;
@@ -225,10 +229,6 @@ public class Cuenta {
     public boolean validarIngreso(String pinIngresado) {
         return this.pin.equals(pinIngresado); // Asegúrate de que ambos sean del mismo tipo
     }
-    
-    
-    
-    
 
     public String getPinEncriptado() {
         return pinEncriptado;
@@ -262,7 +262,6 @@ public class Cuenta {
         byte[] desencriptado = cipher.doFinal(decodificado);
         return new String(desencriptado);
     }
-    
 
     // Ejemplo de cómo usar el método de encriptación cuando se establece un nuevo
     // PIN
@@ -302,12 +301,12 @@ public class Cuenta {
                 '}';
     }
 
-
-
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Cuenta)) return false;
+        if (this == obj)
+            return true;
+        if (!(obj instanceof Cuenta))
+            return false;
         Cuenta otraCuenta = (Cuenta) obj;
         return this.codigo.equals(otraCuenta.codigo); // O cualquier otro identificador único
     }
@@ -317,4 +316,3 @@ public class Cuenta {
         return Objects.hash(codigo); // Asegúrate de que 'codigo' es único para cada cuenta
     }
 }
-

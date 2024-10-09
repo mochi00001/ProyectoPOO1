@@ -21,12 +21,13 @@ public class Formato {
         Pattern pattern = Pattern.compile(regex);
         return pattern.matcher(pin).matches();
     }
-    
+
     // Método para validar el número telefónico
     public static boolean validarTelefono(String telefono) {
-        // Validar que el número de teléfono tenga el formato "+506" seguido de 8 dígitos
+        // Validar que el número de teléfono tenga el formato "+506" seguido de 8
+        // dígitos
         return telefono != null && telefono.matches("\\+506\\d{8}");
-    }    
+    }
 
     // Método para validar el correo electrónico
     public static boolean validarCorreo(String correo) {
@@ -34,4 +35,11 @@ public class Formato {
         String regex = "^[\\w-\\.]+@[\\w-]+\\.[a-zA-Z]{2,}$";
         return correo != null && Pattern.matches(regex, correo);
     }
+
+    // Método para validar el formato de un correo electrónico
+    public static boolean validarFormatoCorreo(String correo) {
+        String regexCorreo = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+        return correo.matches(regexCorreo);
+    }
+
 }
