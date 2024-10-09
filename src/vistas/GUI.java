@@ -13,6 +13,8 @@ import validacion.Formato;
 import java.util.Optional;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,14 +28,11 @@ public class GUI {
 
     private JFrame frame;
 
-    private List<Cliente> listaClientes;
-
     public GUI(CuentaControlador cuentaControlador, ClienteControlador clienteControlador, TransaccionesControlador transaccionesControlador) {
         this.cuentaControlador = cuentaControlador;
         this.clienteControlador = clienteControlador;
         this.transaccionesControlador = transaccionesControlador;
         this.mensajeSMS = new MensajeSMS(); 
-        listaClientes = new ArrayList<>();
         initialize();
     }
 
@@ -425,7 +424,14 @@ public class GUI {
     }
 
     private void realizarDeposito() {
+        TipoDeCambioBCCR.obtenerTipoCambioHoy();
+
         String numeroCuenta = JOptionPane.showInputDialog("Ingrese número de cuenta:");
+    
+        System.out.println("Número de cuenta ingresado: " + numeroCuenta); // Mensaje de depuración
+    
+        // Mostrar todas las cuentas registradas
+        System.out.println("Cuentas registradas: " + transaccionesControlador.obtenerListaCuentas());
     
         // Verificar que la cuenta existe
         if (!transaccionesControlador.verificarCuenta(numeroCuenta)) {
@@ -487,7 +493,7 @@ public class GUI {
     
             try {
                 monto = Double.parseDouble(montoStr);
-                if (monto < 0 || monto % 1 != 0) { // Validar que sea un número entero positivo
+                if (monto <= 0 || monto % 1 != 0) { // Validar que sea un número entero positivo
                     JOptionPane.showMessageDialog(frame, "Error: El monto debe ser un número entero positivo (sin decimales).");
                     return;
                 }
@@ -499,30 +505,42 @@ public class GUI {
             // Obtener el tipo de cambio de compra
             double tipoCambioCompra = TipoDeCambioBCCR.obtenerTipoCambioCompra();
     
-            // Convertir dólares a colones
-            int montoColones = (int) (monto * tipoCambioCompra);
-            // Calcular la comisión (por ejemplo, un 1%)
-            double comision = montoColones * 0.01; // 1% de comisión
-            double montoRealDepositado = montoColones - comision;
+            // Buscar la cuenta correspondiente
+            Cuenta cuenta = cuentaControlador.getCuentas().stream()
+                                               .filter(c -> c.getCodigo().equals(numeroCuenta))
+                                               .findFirst()
+                                               .orElse(null);
     
-            // Llamar al método del controlador
-            boolean resultado = transaccionesControlador.realizarDepositoDolares(numeroCuenta, monto);
+            // Llamar al método del controlador con el tipo de cambio
+            boolean resultado = transaccionesControlador.realizarDepositoDolares(numeroCuenta, monto, tipoCambioCompra);
+    
+            // Mostrar mensaje de confirmación o error
             if (resultado) {
-                // Mensaje de confirmación al usuario
-                String mensaje = String.format("Estimado usuario: %s, se han recibido correctamente %.0f dólares.\n" +
-                                "[Según el BCCR, el tipo de cambio de compra del dólar de hoy %s es: %.2f]\n" +
-                                "[El monto equivalente en colones es %d]\n" +
-                                "[El monto real depositado a su cuenta CTAX es de %.2f colones]\n" +
-                                "[El monto cobrado por concepto de comisión fue de %.2f colones, que fueron rebajados automáticamente de su saldo actual.]",
-                        obtenerNombreCompleto(numeroCuenta), // Método para obtener el nombre completo del dueño
-                        monto,
-                        obtenerFechaActual(), // Método para obtener la fecha actual en formato DD/MM/AAAA
-                        tipoCambioCompra,
-                        montoColones,
-                        montoRealDepositado,
-                        comision);
+                // Obtener el monto equivalente en colones y la comisión para mostrar en el mensaje
+                double montoColones = monto * tipoCambioCompra;
     
-                JOptionPane.showMessageDialog(frame, mensaje);
+                if (cuenta != null) {
+                    double comision = transaccionesControlador.calcularComision(cuenta, montoColones);
+                    double montoRealDepositado = montoColones - comision;
+    
+                    // Mensaje de confirmación al usuario
+                    String mensaje = String.format("Estimado usuario: %s, se han recibido correctamente %.0f dólares.\n" +
+                                    "[Según el BCCR, el tipo de cambio de compra del dólar de hoy %s es: %.2f]\n" +
+                                    "[El monto equivalente en colones es %.2f]\n" +
+                                    "[El monto real depositado a su cuenta %s es de %.2f colones]\n" +
+                                    "[El monto cobrado por concepto de comisión fue de %.2f colones, que fueron rebajados automáticamente de su saldo actual].",
+                            obtenerNombreCompleto(numeroCuenta), 
+                            monto,
+                            LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                            tipoCambioCompra,
+                            montoColones,
+                            numeroCuenta,
+                            montoRealDepositado,
+                            comision);
+                    JOptionPane.showMessageDialog(frame, mensaje);
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Error: No se pudo encontrar la cuenta para calcular la comisión.");
+                }
             } else {
                 JOptionPane.showMessageDialog(frame, "Error: No se pudo realizar el depósito. Verifique la cuenta y el monto.");
             }
@@ -534,12 +552,6 @@ public class GUI {
         // Aquí deberías implementar la lógica para obtener el nombre del propietario de la cuenta
         return "Nombre del Dueño"; // Cambiar a la lógica real
     }
-    
-    // Método ficticio para obtener la fecha actual
-    private String obtenerFechaActual() {
-        // Aquí deberías implementar la lógica para obtener la fecha actual en formato DD/MM/AAAA
-        return "DD/MM/AAAA"; // Cambiar a la lógica real
-    }    
 
     private void realizarRetiro() {
         String numeroCuenta = JOptionPane.showInputDialog("Ingrese número de cuenta:");
@@ -664,7 +676,7 @@ public class GUI {
         String[] opciones = {"Consultar Saldo Actual", "Consultar Saldo en Dólares", "Cancelar"};
         int seleccion = JOptionPane.showOptionDialog(frame, "Seleccione una opción:", "Consultar Saldo",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opciones, opciones[0]);
-    
+
         switch (seleccion) {
             case 0: // Consultar Saldo Actual
                 consultarSaldoActual();
@@ -678,59 +690,75 @@ public class GUI {
                 break;
         }
     }
+
     private void consultarSaldoActual() {
-        // Solicitar número de cuenta
-        String numeroCuenta = JOptionPane.showInputDialog(frame, "Ingrese el número de cuenta:");
-        if (numeroCuenta == null || numeroCuenta.isEmpty()) {
-            return; // Cancelar si no se ingresa un número de cuenta
-        }
-    
-        // Solicitar PIN
-        String pin = JOptionPane.showInputDialog(frame, "Ingrese el PIN de la cuenta:");
-        if (pin == null || pin.isEmpty()) {
-            return; // Cancelar si no se ingresa un PIN
-        }
-    
-        // Consultar saldo
-        int saldo = transaccionesControlador.consultarSaldo(numeroCuenta, pin);
-        if (saldo >= 0) {
-            // Mostrar saldo
-            JOptionPane.showMessageDialog(frame, "Estimado usuario: " + obtenerNombreCompleto(numeroCuenta) + ", el saldo actual de su cuenta " + numeroCuenta + " es de " + saldo + " colones.");
-        } else {
-            // Mostrar mensaje de error
-            JOptionPane.showMessageDialog(frame, "Número de cuenta o PIN incorrecto.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        String numeroCuenta = solicitarNumeroCuenta();
+        if (numeroCuenta == null) return;
+
+        String pin = solicitarPIN();
+        if (pin == null) return;
+
+        double saldo = transaccionesControlador.consultarSaldo(numeroCuenta, pin);
+        mostrarSaldo(numeroCuenta, saldo, "colones");
     }
 
     private void consultarSaldoActualDivisa() {
-        // Solicitar número de cuenta
-        String numeroCuenta = JOptionPane.showInputDialog(frame, "Ingrese el número de cuenta:");
-        if (numeroCuenta == null || numeroCuenta.isEmpty()) {
-            return; // Cancelar si no se ingresa un número de cuenta
-        }
-    
-        // Solicitar PIN
-        String pin = JOptionPane.showInputDialog(frame, "Ingrese el PIN de la cuenta:");
-        if (pin == null || pin.isEmpty()) {
-            return; // Cancelar si no se ingresa un PIN
-        }
-    
-        // Consultar saldo
-        int saldo = transaccionesControlador.consultarSaldo(numeroCuenta, pin);
+        String numeroCuenta = solicitarNumeroCuenta();
+        if (numeroCuenta == null) return;
+
+        String pin = solicitarPIN();
+        if (pin == null) return;
+
+        double saldo = transaccionesControlador.consultarSaldo(numeroCuenta, pin);
         if (saldo >= 0) {
-            // Obtener tipo de cambio de compra
-            TipoDeCambioBCCR.obtenerTipoCambioHoy(); // Asegúrate de que este método se llama antes de obtener el tipo de cambio
-            double tipoCambioCompra = TipoDeCambioBCCR.obtenerTipoCambioCompra();
-            double saldoDolares = saldo / tipoCambioCompra;
-    
-            // Mostrar saldo en dólares
-            JOptionPane.showMessageDialog(frame, "Estimado usuario: " + obtenerNombreCompleto(numeroCuenta) + ", el saldo actual de su cuenta " + numeroCuenta + " es de " + saldoDolares + " dólares.\n" +
-                    "Para esta conversión se utilizó el tipo de cambio de compra del dólar de hoy: " + tipoCambioCompra + " colones.");
+            try {
+                TipoDeCambioBCCR.obtenerTipoCambioHoy(); // Obtener tipo de cambio
+                double tipoCambioCompra = TipoDeCambioBCCR.obtenerTipoCambioCompra();
+                double saldoDolares = saldo / tipoCambioCompra;
+
+                JOptionPane.showMessageDialog(frame,
+                    "Estimado usuario: " + obtenerNombreCompleto(numeroCuenta) + 
+                    ", el saldo actual de su cuenta " + numeroCuenta + 
+                    " es de " + saldoDolares + " dólares.\n" +
+                    "Para esta conversión se utilizó el tipo de cambio de compra del dólar de hoy: " + 
+                    tipoCambioCompra + " colones.");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(frame, 
+                    "Error al obtener el tipo de cambio: " + e.getMessage(), 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
         } else {
-            // Mostrar mensaje de error
-            JOptionPane.showMessageDialog(frame, "Número de cuenta o PIN incorrecto.", "Error", JOptionPane.ERROR_MESSAGE);
+            mostrarError();
         }
     }
+
+    private String solicitarNumeroCuenta() {
+        String numeroCuenta = JOptionPane.showInputDialog(frame, "Ingrese el número de cuenta:");
+        return (numeroCuenta == null || numeroCuenta.isEmpty()) ? null : numeroCuenta;
+    }
+
+    private String solicitarPIN() {
+        String pin = JOptionPane.showInputDialog(frame, "Ingrese el PIN de la cuenta:");
+        return (pin == null || pin.isEmpty()) ? null : pin;
+    }
+
+    private void mostrarSaldo(String numeroCuenta, double saldo, String divisa) {
+        if (saldo >= 0) {
+            JOptionPane.showMessageDialog(frame,
+                "Estimado usuario: " + obtenerNombreCompleto(numeroCuenta) + 
+                ", el saldo actual de su cuenta " + numeroCuenta + 
+                " es de " + saldo + " " + divisa + ".");
+        } else {
+            mostrarError();
+        }
+    }
+
+    private void mostrarError() {
+        JOptionPane.showMessageDialog(frame, 
+            "Número de cuenta o PIN incorrecto.", 
+            "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
 
     public void iniciar() {
         frame.setVisible(true);
