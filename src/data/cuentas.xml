@@ -6,34 +6,4 @@
         <saldo>9000.00</saldo>
         <identificacion>305260528</identificacion>
     </cuenta>
-    <cuenta>
-        <numeroCuenta>cta-1</numeroCuenta>
-        <estatus>Activa</estatus>
-        <saldo>7000.00</saldo>
-        <identificacion>108310340</identificacion>
-    </cuenta>
-    <cuenta>
-        <numeroCuenta>cta-2</numeroCuenta>
-        <estatus>Activa</estatus>
-        <saldo>6000.00</saldo>
-        <identificacion>108310340</identificacion>
-    </cuenta>
-    <cuenta>
-        <numeroCuenta>cta-3</numeroCuenta>
-        <estatus>Activa</estatus>
-        <saldo>5550.00</saldo>
-        <identificacion>305260528</identificacion>
-    </cuenta>
-    <cuenta>
-        <numeroCuenta>cta-4</numeroCuenta>
-        <estatus>Activa</estatus>
-        <saldo>4500.00</saldo>
-        <identificacion>305260528</identificacion>
-    </cuenta>
-    <cuenta>
-        <numeroCuenta>cta-5</numeroCuenta>
-        <estatus>Activa</estatus>
-        <saldo>60000.00</saldo>
-        <identificacion>305260528</identificacion>
-    </cuenta>
 </cuentas>
