@@ -1,24 +1,59 @@
 package controladores;
 
-import java.time.LocalDateTime; 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
+import java.util.Optional;
 import modelos.Cuenta;
 import modelos.Transaccion;
 import servicios.PersistenciaDatos;
 import servicios.TipoDeCambioBCCR;
+import java.time.format.DateTimeFormatter;
+import controladores.CuentaControlador;
 
-import java.util.stream.Collectors;
 
 
 public class TransaccionesControlador {
 
     private CuentaControlador cuentaControlador;
+    private ClienteControlador clienteControlador;
+    private List<Transaccion> transacciones;
 
     public TransaccionesControlador(CuentaControlador cuentaControlador) {
         this.cuentaControlador = cuentaControlador;
+        this.transacciones = new ArrayList<>(); // Inicializa la lista de transacciones
+        cargarTransacciones(); // Carga las transacciones al crear el controlador
+        this.clienteControlador = new ClienteControlador();
     }
+
+    public void cargarTransacciones() {
+        List<Transaccion> transaccionesDesdeArchivo = PersistenciaDatos.cargarTransacciones();
+        System.out.println("Cargando transacciones desde archivo, total: " + transaccionesDesdeArchivo.size());
+    
+        for (Transaccion transaccion : transaccionesDesdeArchivo) {
+            System.out.println("Procesando transacción: " + transaccion);
+    
+            Optional<Cuenta> cuentaOpt = cuentaControlador.obtenerCuentaPorNumero(transaccion.getCodigoCuenta());
+            if (cuentaOpt.isPresent()) {
+                transacciones.add(transaccion); // Agrega la transacción a la lista
+                System.out.println("Transacción añadida para la cuenta: " + transaccion.getCodigoCuenta());
+                System.out.println(transaccion); // También mostrará la transacción en formato legible
+            } else {
+                System.out.println("La cuenta " + transaccion.getCodigoCuenta() + " no se encuentra registrada.");
+            }
+        }
+    }
+
+    public List<Transaccion> obtenerTransaccionesPorCuenta(String numeroCuenta) {
+        List<Transaccion> transaccionesPorCuenta = new ArrayList<>();
+        for (Transaccion transaccion : transacciones) { // Asegúrate de usar la variable 'transacciones' aquí
+            if (transaccion.getCodigoCuenta().equals(numeroCuenta)) {
+                transaccionesPorCuenta.add(transaccion);
+            }
+        }
+        return transaccionesPorCuenta;
+    }
+
 
     // Verificar si la cuenta existe
     public boolean verificarCuenta(String numeroCuenta) {
@@ -47,12 +82,14 @@ public class TransaccionesControlador {
             // Crear la transacción
             Transaccion transaccion = new Transaccion("Depósito en Colones", cantidad, numeroCuenta);
             transaccion.setMontoComision(comision);
-            transaccion.setFecha(LocalDateTime.now());
+            transaccion.setFecha(LocalDate.now());
     
             // Guardar la transacción en el archivo XML
             List<Transaccion> transacciones = PersistenciaDatos.cargarTransacciones();
             transacciones.add(transaccion);
             PersistenciaDatos.guardarTransacciones(transacciones);
+
+            PersistenciaDatos.guardarCuentas(cuentaControlador.getCuentas());
     
             // Mensaje de confirmación
             System.out.println("Estimado usuario: " + cuenta.getMiCliente().getIdentificacion() + 
@@ -94,12 +131,14 @@ public class TransaccionesControlador {
             // Crear y registrar la transacción
             Transaccion transaccion = new Transaccion("Depósito en Dólares", montoColones, numeroCuenta);
             transaccion.setMontoComision(comision);
-            transaccion.setFecha(LocalDateTime.now());
+            transaccion.setFecha(LocalDate.now());
     
             // Guardar la transacción en el archivo XML
             List<Transaccion> transacciones = PersistenciaDatos.cargarTransacciones();
             transacciones.add(transaccion);
             PersistenciaDatos.guardarTransacciones(transacciones);
+
+            PersistenciaDatos.guardarCuentas(cuentaControlador.getCuentas());
     
             // Mensaje detallado al usuario
             String mensaje = String.format("Estimado usuario: %s, se han recibido correctamente %.0f dólares.\n" +
@@ -185,18 +224,19 @@ public class TransaccionesControlador {
         cuenta.setSaldo(nuevoSaldo);
         
         // Establecer la fecha y la comisión de la transacción
-        transaccion.setFecha(LocalDateTime.now());
+        transaccion.setFecha(LocalDate.now());
         transaccion.setMontoComision(comision);
     
         // Guardar la transacción en el archivo XML
         List<Transaccion> transacciones = PersistenciaDatos.cargarTransacciones(); // Cargar transacciones existentes
         transacciones.add(transaccion); // Agregar la nueva transacción
         PersistenciaDatos.guardarTransacciones(transacciones); // Guardar la lista actualizada de transacciones
-    
+
+        PersistenciaDatos.guardarCuentas(cuentaControlador.getCuentas());
+
         System.out.println("Retiro realizado con éxito.");
         return true;
     }
-    
     
     // Método para validar el PIN ingresado
     private boolean validarPinCuenta(String numeroCuenta, String pinIngresado) {
@@ -212,26 +252,28 @@ public class TransaccionesControlador {
     
 
     public double consultarSaldo(String numeroCuenta, String pin) {
-        // Obtener la cuenta por su número
         Cuenta cuenta = obtenerCuentaPorCodigo(numeroCuenta);
         if (cuenta == null) {
             System.out.println("Error: La cuenta no está registrada en el sistema.");
             return -1; // Indicar que la cuenta no fue encontrada
         }
     
-        // Validar el PIN del cliente
+        // Mensaje de depuración
+        System.out.println("PIN ingresado: " + pin);
+        System.out.println("PIN almacenado: " + cuenta.getPin()); // Asegúrate de tener un método getPin()
+    
         if (!cuenta.validarIngreso(pin)) {
             System.out.println("Error: PIN incorrecto.");
             return -1; // Indicar que el PIN es incorrecto
         }
     
-        // Si todo está correcto, retornar el saldo
-        return cuenta.getSaldo();
+        return cuenta.getSaldo(); // Retornar el saldo
     }
+    
     
 
 
-    private Cuenta obtenerCuentaPorCodigo(String numeroCuenta) {
+    public Cuenta obtenerCuentaPorCodigo(String numeroCuenta) {
         // Iterar sobre la lista de cuentas
         for (Cuenta cuenta : cuentaControlador.getCuentas()) {
             // Comparar el código de la cuenta con el número de cuenta proporcionado
@@ -241,13 +283,38 @@ public class TransaccionesControlador {
         }
         return null; // Retorna null si no se encuentra la cuenta
     }
-    
 
-    public List<String> obtenerListaCuentas() {
-        // Obtener las cuentas del CuentaControlador y devolver sus códigos
-        return cuentaControlador.getCuentas().stream()
-                                .map(Cuenta::getCodigo) // Extraer el código de cada cuenta
-                                .collect(Collectors.toList()); // Convertir a una lista de códigos
+    public void realizarTransferencia(String numeroCuentaOrigen, String pin, String palabraRecibida,
+                                       String numeroCuentaDestino, double montoTransferencia) {
+        // Validar que el monto de transferencia sea válido
+        if (montoTransferencia <= 0) {
+            System.out.println("Error: El monto de transferencia debe ser mayor a cero.");
+            return;
+        }
+
+        // Obtener la cuenta de origen
+        Cuenta cuentaOrigen = obtenerCuentaPorCodigo(numeroCuentaOrigen);
+        if (cuentaOrigen == null) {
+            System.out.println("Error: La cuenta de origen no está registrada en el sistema.");
+            return;
+        }
+
+        // Validar el PIN ingresado
+        if (!validarPinCuenta(numeroCuentaOrigen, pin)) {
+            System.out.println("Error: Código de cuenta o PIN incorrecto.");
+            return;
+        }
+
+        // Obtener la cuenta de destino
+        Cuenta cuentaDestino = obtenerCuentaPorCodigo(numeroCuentaDestino);
+        if (cuentaDestino == null) {
+            System.out.println("Error: La cuenta destino no existe.");
+            return;
+        }
+
+        // Realizar la transferencia utilizando el método de Cuenta
+        cuentaOrigen.realizarTransaccionEntreCuentas(montoTransferencia, cuentaDestino, palabraRecibida, clienteControlador);
+
     }
     
 

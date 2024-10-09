@@ -1,8 +1,10 @@
 package modelos;
 
 import servicios.MensajeSMS;
+import servicios.PersistenciaDatos;
 import servicios.CorreoElectronico;
 import validacion.Formato;
+import controladores.ClienteControlador;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,6 +44,7 @@ public class Cuenta {
         this.estatus = "Activa";
         this.fechaCreacion = LocalDate.now();
     }
+    
 
     // Funcionalidades
     public List<Transaccion> getTransacciones() {
@@ -133,13 +136,74 @@ public class Cuenta {
             }
         }
     }
+
+    public void realizarTransaccionEntreCuentas(double monto, Cuenta cuentaDestino, String pCodigo, ClienteControlador clienteControlador) {
+        String tipo = "Transferencia";
+        if (validarEstatus()) {
+            // Enviar mensaje de verificación
+            MensajeSMS mensajeCodigo = new MensajeSMS();
+            boolean mensaje = mensajeCodigo.enviarMensajeVerificacion(miCliente.getNumTelefono(), generarCodigoAleatorio());
+            if (mensaje) {
+                int intentosValidacion = 0;
+                while (intentosValidacion < 3) {
+                    if (mensajeCodigo.verificarCodigo(pCodigo)) {
+                        // Validar que haya suficiente saldo
+                        if (monto <= saldo) {
+                            // Realizar la transferencia
+                            saldo -= monto; // Resta del saldo de la cuenta origen
+                            cuentaDestino.setSaldo(cuentaDestino.getSaldo() + monto); // Suma al saldo de la cuenta destino
+    
+                            // Crear nueva transacción
+                            Transaccion nuevaTransaccion = new Transaccion(tipo, monto, this.codigo);
+                            transacciones.add(nuevaTransaccion);
+                            nuevaTransaccion.setFecha(LocalDate.now());
+                            cantidadTransacciones++;
+    
+                            System.out.println("Transferencia de " + monto + " colones realizada con éxito.");
+    
+                            // Guardar la nueva transacción
+                            List<Transaccion> transacciones = PersistenciaDatos.cargarTransacciones(); // Cargar transacciones existentes
+                            transacciones.add(nuevaTransaccion); // Agregar la nueva transacción
+                            PersistenciaDatos.guardarTransacciones(transacciones); // Guardar la lista actualizada de transacciones
+    
+                            // Actualizar cuentas en cuentas.xml
+                            List<Cuenta> cuentas = PersistenciaDatos.cargarCuentas(clienteControlador); // Pasar el ClienteControlador
+                            for (Cuenta cuenta : cuentas) {
+                                if (cuenta.getCodigo().equals(this.codigo)) {
+                                    cuenta.setSaldo(this.saldo); // Actualizar saldo de la cuenta origen
+                                } else if (cuenta.getCodigo().equals(cuentaDestino.getCodigo())) {
+                                    cuenta.setSaldo(cuentaDestino.getSaldo()); // Actualizar saldo de la cuenta destino
+                                }
+                            }
+                            PersistenciaDatos.guardarCuentas(cuentas); // Guardar la lista actualizada de cuentas
+                        } else {
+                            System.out.println("Error: Saldo insuficiente para realizar la transferencia.");
+                        }
+                        break; // Salir del bucle si la verificación fue exitosa
+                    } else {
+                        intentosValidacion++;
+                    }
+                }
+                if (intentosValidacion >= 3) {
+                    bloquearCuenta(); // Bloquear cuenta si se superan los intentos
+                    System.out.println("La cuenta ha sido bloqueada debido a múltiples intentos fallidos.");
+                }
+            }
+        } else {
+            System.out.println("Error: La cuenta no está activa o tiene restricciones.");
+        }
+    }
+    
+    
+    
+    
     
 
     private boolean validarCambioPin(String pinActual, String pinNuevo) {
         return !pinActual.equals(pinNuevo);
     }
 
-    private boolean validarPin(String pin) {
+    public boolean validarPin(String pin) {
         return this.pin.equals(pin);
     }
 
@@ -159,24 +223,9 @@ public class Cuenta {
     }
 
     public boolean validarIngreso(String pinIngresado) {
-        try {
-            String pinEncriptadoIngresado = encriptarPin(pinIngresado); // Encriptar el PIN ingresado
-    
-            if (pinEncriptadoIngresado.equals(pinEncriptado)) { // Comparar con el PIN encriptado
-                usosPin = 0; // Reiniciar el contador si el PIN es correcto
-                return true;
-            } else {
-                usosPin++;
-                if (usosPin >= 3) {
-                    bloquearCuenta(); // Bloquear cuenta si se alcanzan 3 intentos fallidos
-                }
-                return false; // PIN incorrecto
-            }
-        } catch (Exception e) {
-            System.err.println("Error al validar el PIN: " + e.getMessage());
-            return false; // Manejo de excepción
-        }
+        return this.pin.equals(pinIngresado); // Asegúrate de que ambos sean del mismo tipo
     }
+    
     
     
     

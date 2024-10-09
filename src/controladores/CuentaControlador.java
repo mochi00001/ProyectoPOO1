@@ -7,11 +7,12 @@ import java.util.Optional;
 
 import modelos.Cliente;
 import modelos.Cuenta;
+import modelos.Transaccion; 
 import servicios.PersistenciaDatos;
 import validacion.Formato;
 
 public class CuentaControlador {
-    private List<Cuenta> cuentas; // Cambia a List
+    private List<Cuenta> cuentas; // Lista de cuentas
 
     public CuentaControlador(ClienteControlador clienteControlador) {
         this.cuentas = new ArrayList<>(); // Inicializa como ArrayList
@@ -23,10 +24,8 @@ public class CuentaControlador {
         System.out.println("Cargando cuentas desde archivo, total: " + cuentasDesdeArchivo.size());
         for (Cuenta cuenta : cuentasDesdeArchivo) {
             System.out.println("Procesando cuenta: " + cuenta.getCodigo());
-            // Asegúrate de no añadir cuentas duplicadas en la lista
             if (!cuentas.contains(cuenta)) {
                 cuentas.add(cuenta);
-                // Asegúrate de que la cuenta tiene el cliente asociado
                 if (cuenta.getMiCliente() != null && !cuenta.getMiCliente().getMisCuentas().contains(cuenta)) {
                     cuenta.getMiCliente().getMisCuentas().add(cuenta);
                     System.out.println("Cuenta añadida: " + cuenta.getCodigo() + " al cliente: " + cuenta.getMiCliente().getIdentificacion());
@@ -36,6 +35,7 @@ public class CuentaControlador {
             }
         }
     }
+
 
     public List<Cuenta> getCuentas() {
         return cuentas;
@@ -84,17 +84,17 @@ public class CuentaControlador {
     
     
     // Método para cambiar el PIN de una cuenta
-    public boolean cambiarPinCuenta(String numeroCuenta, String pinActual, String nuevoPin) {
-        for (Cuenta cuenta : cuentas) {
-            if (cuenta.getCodigo().equals(numeroCuenta)) {
-                if (cuenta.validarIngreso(pinActual)) {
-                    cuenta.cambiarPin(nuevoPin);
-                    return true;
-                }
-            }
+    public boolean cambiarPinCuenta(Cuenta cuenta, String nuevoPin) {
+        try {
+            cuenta.setPin(nuevoPin);
+            PersistenciaDatos.guardarCuentas(cuentas); // Guardar la lista actualizada
+            return true; // Indicar que el cambio fue exitoso
+        } catch (Exception e) {
+            System.err.println("Error al cambiar el PIN: " + e.getMessage());
+            return false; // Indicar que hubo un error
         }
-        return false; // Error en autenticación o cuenta no encontrada
     }
+    
     
 
     // Método para eliminar una cuenta

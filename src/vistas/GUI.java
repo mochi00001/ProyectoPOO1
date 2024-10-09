@@ -262,7 +262,7 @@ public class GUI {
         }
     
         // Cambiar el PIN
-        boolean resultado = cuentaControlador.cambiarPIN(cuenta, nuevoPin);
+        boolean resultado = cuentaControlador.cambiarPinCuenta(cuenta, nuevoPin);
         if (resultado) {
             JOptionPane.showMessageDialog(frame, "Estimado usuario le informamos que se ha cambiado satisfactoriamente el PIN de su cuenta " + numeroCuenta + ".");
         } else {
@@ -424,14 +424,14 @@ public class GUI {
     }
 
     private void realizarDeposito() {
-        TipoDeCambioBCCR.obtenerTipoCambioHoy();
+        //TipoDeCambioBCCR.obtenerTipoCambioHoy();
 
         String numeroCuenta = JOptionPane.showInputDialog("Ingrese número de cuenta:");
     
         System.out.println("Número de cuenta ingresado: " + numeroCuenta); // Mensaje de depuración
     
         // Mostrar todas las cuentas registradas
-        System.out.println("Cuentas registradas: " + transaccionesControlador.obtenerListaCuentas());
+        System.out.println("Cuentas registradas: " + cuentaControlador.getCuentas());        ;
     
         // Verificar que la cuenta existe
         if (!transaccionesControlador.verificarCuenta(numeroCuenta)) {
@@ -589,34 +589,81 @@ public class GUI {
     }
      
     private void realizarTransferencia() {
+        // Solicitar la identificación del cliente
+        String idClienteStr = JOptionPane.showInputDialog("Ingrese la identificación del cliente:");
+    
+        // Validar que la identificación sea un número válido
+        int idCliente;
+        try {
+            idCliente = Integer.parseInt(idClienteStr); // Convertir el valor ingresado a un número
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(frame, "Error: La identificación debe ser un número.");
+            return; // Salir si la identificación no es válida
+        }
+    
+        // Solicitar número de cuenta origen
         String numeroCuentaOrigen = JOptionPane.showInputDialog("Ingrese número de cuenta origen:");
+        
+        // Solicitar PIN del cliente
         String pinCliente = JOptionPane.showInputDialog("Ingrese PIN del cliente:");
     
-        Cuenta cuentaOrigen = transaccionesControlador.buscarCuenta(numeroCuentaOrigen);
+        // Validar que se ingresaron los datos
+        if (numeroCuentaOrigen == null || pinCliente == null) {
+            JOptionPane.showMessageDialog(frame, "Error: Datos incompletos.");
+            return;
+        }
     
-        if (cuentaOrigen != null && cuentaOrigen.validarPin(pinCliente)) {
-            // Generar un código de verificación y enviarlo
-            String numeroDestino = cuentaOrigen.getPropietario().getNumTelefono(); // Obtener el número de teléfono
-            String palabraVerificacion = mensajeSMS.generarPalabraVerificacion();
+        // Buscar la cuenta de origen
+        Cuenta cuentaOrigen = transaccionesControlador.obtenerCuentaPorCodigo(numeroCuentaOrigen);
+        if (cuentaOrigen == null || !cuentaOrigen.validarPin(pinCliente)) {
+            JOptionPane.showMessageDialog(frame, "Error: Número de cuenta o PIN incorrecto.");
+            return;
+        }
+    
+        // Generar un código de verificación y enviarlo
+        String numeroDestino = cuentaOrigen.getMiCliente().getNumTelefono(); // Obtener el número de teléfono
+        String palabraVerificacion = mensajeSMS.generarPalabraVerificacion();
 
-            // Enviar el mensaje de verificación
-            boolean mensajeEnviado = mensajeSMS.enviarMensajeVerificacion(numeroDestino, palabraVerificacion); // Usar la instancia de MensajeSMS
-        
-            if (mensajeEnviado) {
-                String palabraIngresada = JOptionPane.showInputDialog("Ingrese la palabra de verificación enviada:");
-                if (palabraIngresada.equals(mensajeSMS.getPalabraGenerada())) { // Verificar con el código enviado
-                    // Aquí continúa el flujo de la transferencia
-                } else {
-                    JOptionPane.showMessageDialog(frame, "Palabra de verificación incorrecta.");
+        // Enviar el mensaje de verificación
+        boolean mensajeEnviado = mensajeSMS.enviarMensajeVerificacion(numeroDestino, palabraVerificacion);
+
+        if (mensajeEnviado) {
+            // Solicitar la palabra de verificación ingresada por el usuario
+            String palabraIngresada = JOptionPane.showInputDialog("Ingrese la palabra de verificación enviada:");
+            
+            // Verificar la palabra ingresada con la palabra generada
+            if (palabraIngresada != null && mensajeSMS.verificarCodigo(palabraIngresada)) { // Verificar con el código enviado
+                
+                // Solicitar número de cuenta destino
+                String numeroCuentaDestino = JOptionPane.showInputDialog("Ingrese número de cuenta destino:");
+                
+                // Solicitar monto de transferencia
+                String montoStr = JOptionPane.showInputDialog("Ingrese monto a transferir:");
+                double montoTransferencia;
+
+                try {
+                    montoTransferencia = Double.parseDouble(montoStr);
+                    if (montoTransferencia <= 0) {
+                        JOptionPane.showMessageDialog(frame, "Error: El monto de transferencia debe ser mayor a cero.");
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(frame, "Error: El monto de transferencia debe ser un número válido.");
+                    return;
                 }
+
+                // Realizar la transferencia
+                transaccionesControlador.realizarTransferencia(numeroCuentaOrigen, pinCliente, palabraVerificacion, numeroCuentaDestino, montoTransferencia);
             } else {
-                JOptionPane.showMessageDialog(frame, "Error al enviar el mensaje de verificación.");
+                JOptionPane.showMessageDialog(frame, "Palabra de verificación incorrecta.");
             }
         } else {
-            JOptionPane.showMessageDialog(frame, "Error: Número de cuenta o PIN incorrecto.");
+            JOptionPane.showMessageDialog(frame, "Error al enviar el mensaje de verificación.");
         }
-        
+
     }
+    
+    
     
     private void consultarTransacciones() {
         String numeroCuenta = JOptionPane.showInputDialog("Ingrese el número de cuenta para consultar sus transacciones:");
@@ -635,11 +682,12 @@ public class GUI {
         } else {
             StringBuilder detalles = new StringBuilder("Transacciones para la cuenta " + numeroCuenta + ":\n\n");
             for (Transaccion transaccion : historial) {
-                detalles.append(transaccion.toString()).append("\n");
+                detalles.append(transaccion.toString()).append("\n");  // Aquí se llama al método toString()
             }
             JOptionPane.showMessageDialog(frame, detalles.toString());
         }
     }
+    
 
     private void consultarTipoCambio() {
         String[] opciones = {"Compra", "Venta"};
@@ -710,18 +758,20 @@ public class GUI {
 
     private void consultarSaldoActualDivisa() {
         String numeroCuenta = solicitarNumeroCuenta();
-        if (numeroCuenta == null) return;
-
+        if (numeroCuenta == null) return; // Si no se ingresa el número de cuenta, salir del método.
+    
         String pin = solicitarPIN();
-        if (pin == null) return;
-
+        if (pin == null) return; // Si no se ingresa el PIN, salir del método.
+    
+        // Obtener el saldo de la cuenta utilizando el controlador de transacciones
         double saldo = transaccionesControlador.consultarSaldo(numeroCuenta, pin);
-        if (saldo >= 0) {
+        if (saldo >= 0) { // Verificar si el saldo es válido
             try {
-                TipoDeCambioBCCR.obtenerTipoCambioHoy(); // Obtener tipo de cambio
-                double tipoCambioCompra = TipoDeCambioBCCR.obtenerTipoCambioCompra();
-                double saldoDolares = saldo / tipoCambioCompra;
-
+                TipoDeCambioBCCR.obtenerTipoCambioHoy(); // Obtener el tipo de cambio
+                double tipoCambioCompra = TipoDeCambioBCCR.obtenerTipoCambioCompra(); // Obtener el tipo de cambio de compra
+                double saldoDolares = saldo / tipoCambioCompra; // Convertir saldo a dólares
+    
+                // Mostrar el saldo en dólares al usuario
                 JOptionPane.showMessageDialog(frame,
                     "Estimado usuario: " + obtenerNombreCompleto(numeroCuenta) + 
                     ", el saldo actual de su cuenta " + numeroCuenta + 
@@ -729,14 +779,16 @@ public class GUI {
                     "Para esta conversión se utilizó el tipo de cambio de compra del dólar de hoy: " + 
                     tipoCambioCompra + " colones.");
             } catch (Exception e) {
+                // Manejo de excepciones si ocurre un error al obtener el tipo de cambio
                 JOptionPane.showMessageDialog(frame, 
                     "Error al obtener el tipo de cambio: " + e.getMessage(), 
                     "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
+            // Mostrar un mensaje de error si el saldo no es válido
             mostrarError();
         }
-    }
+    }    
 
     private String solicitarNumeroCuenta() {
         String numeroCuenta = JOptionPane.showInputDialog(frame, "Ingrese el número de cuenta:");

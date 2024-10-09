@@ -1,13 +1,15 @@
 package modelos;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Transaccion {
     private static int cantidadTransacciones;
     private double porcentajeComision; // Porcentaje de comisión
     private String tipo; // Tipo de transacción (depósito o retiro)
-    private LocalDateTime fecha; // Fecha de la transacción
+    private LocalDate fecha; // Fecha de la transacción
     private double monto; // Monto de la transacción
     private double montoComision; // Monto de la comisión total
     private String codigoCuenta; // Atributo para el código de cuenta
@@ -17,7 +19,7 @@ public class Transaccion {
         this.tipo = tipo;
         this.monto = monto;
         this.codigoCuenta = codigoCuenta; // Asigna el código de cuenta
-        this.fecha = LocalDateTime.now();
+        this.fecha = LocalDate.now();
     }
 
     // Método para realizar un retiro y calcular el saldo
@@ -50,7 +52,7 @@ public class Transaccion {
     }
 
     // Getters
-    public LocalDateTime getFecha() {
+    public LocalDate getFecha() {
         return fecha;
     }
 
@@ -81,11 +83,17 @@ public class Transaccion {
     }
 
     // Setters
-    public void setFecha(LocalDateTime fecha) {
+    public void setFecha(LocalDate fecha) {
         this.fecha = fecha; // Establece la fecha de la transacción
     }
 
     public void setMontoComision(double montoComision) {
         this.montoComision = montoComision; // Establece el monto de la comisión
     }
+
+    @Override
+    public String toString() {
+        return "Cuenta: " + codigoCuenta + ", Monto: " + monto + ", Fecha: " + fecha;
+    }
+
 }

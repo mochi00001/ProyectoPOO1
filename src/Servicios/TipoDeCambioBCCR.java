@@ -72,4 +72,5 @@ public class TipoDeCambioBCCR {
         }
         return 0; // O lanza una excepción si prefieres manejar el error de otra forma
     }
+
 }

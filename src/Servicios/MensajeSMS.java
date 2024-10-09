@@ -6,6 +6,8 @@ import com.twilio.type.PhoneNumber;
 
 import modelos.Cuenta;
 
+import java.security.SecureRandom;
+
 public class MensajeSMS {
     // Credenciales de Twilio
     private static final String ACCOUNT_SID = "AC260096de90652894c1ed20f7835f57a6";
@@ -60,14 +62,36 @@ public class MensajeSMS {
         return codigoGenerado != null && codigoGenerado.equals(codigoIngresado);
     }
 
+    /**
+     * Método para generar una palabra de verificación aleatoria.
+     *
+     * @return Una palabra de verificación como String.
+     */
+    public String generarPalabraVerificacion() {
+        String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; // Caracteres permitidos
+        StringBuilder palabra = new StringBuilder();
+        SecureRandom random = new SecureRandom();
+
+        for (int i = 0; i < 8; i++) { // Longitud de la palabra de verificación
+            int indice = random.nextInt(caracteres.length());
+            palabra.append(caracteres.charAt(indice));
+        }
+
+        return palabra.toString();
+    }
+
     // Método de prueba
     public static void main(String[] args) {
         MensajeSMS mensajeSMS = new MensajeSMS();
 
-        // Definir el código personalizado que deseas enviar
-        String codigoPersonalizado = Cuenta.generarCodigoAleatorio(); // El código que desees
+        // Generar la palabra de verificación
+        String palabraVerificacion = mensajeSMS.generarPalabraVerificacion();
+        System.out.println("Palabra de verificación generada: " + palabraVerificacion);
 
-        // Enviar el mensaje de verificación con el código personalizado
+        // Generar un código aleatorio (suponiendo que tienes un método en Cuenta para esto)
+        String codigoPersonalizado = Cuenta.generarCodigoAleatorio(); // Asegúrate de que este método esté definido
+
+        // Enviar el mensaje de verificación con el código generado
         boolean resultadoEnvio = mensajeSMS.enviarMensajeVerificacion("+50689655235", codigoPersonalizado);
 
         if (resultadoEnvio) {
