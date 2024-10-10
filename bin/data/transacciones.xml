@@ -2,17 +2,8 @@
 <transacciones>
     <transaccion>
         <fecha>2024-10-09</fecha>
-        <tipo>Depósito en Colones</tipo>
-        <monto>1000.0</monto>
-        <comision>false</comision>
-        <montoRetiroComision>0.0</montoRetiroComision>
-        <montoDepositoComision>0.0</montoDepositoComision>
-        <numeroCuenta>cta-0</numeroCuenta>
-    </transaccion>
-    <transaccion>
-        <fecha>2024-10-09</fecha>
-        <tipo>Depósito en Colones</tipo>
-        <monto>300.0</monto>
+        <tipo>Retiro</tipo>
+        <monto>2000.0</monto>
         <comision>false</comision>
         <montoRetiroComision>0.0</montoRetiroComision>
         <montoDepositoComision>0.0</montoDepositoComision>
@@ -21,64 +12,10 @@
     <transaccion>
         <fecha>2024-10-09</fecha>
         <tipo>Retiro</tipo>
-        <monto>300.0</monto>
+        <monto>522.37</monto>
         <comision>false</comision>
         <montoRetiroComision>0.0</montoRetiroComision>
         <montoDepositoComision>0.0</montoDepositoComision>
-        <numeroCuenta>cta-7</numeroCuenta>
-    </transaccion>
-    <transaccion>
-        <fecha>2024-10-09</fecha>
-        <tipo>Depósito en Colones</tipo>
-        <monto>20000.0</monto>
-        <comision>false</comision>
-        <montoRetiroComision>0.0</montoRetiroComision>
-        <montoDepositoComision>0.0</montoDepositoComision>
-        <numeroCuenta>cta-0</numeroCuenta>
-    </transaccion>
-    <transaccion>
-        <fecha>2024-10-09</fecha>
-        <tipo>Depósito en Colones</tipo>
-        <monto>20000.0</monto>
-        <comision>false</comision>
-        <montoRetiroComision>0.0</montoRetiroComision>
-        <montoDepositoComision>0.0</montoDepositoComision>
-        <numeroCuenta>cta-1</numeroCuenta>
-    </transaccion>
-    <transaccion>
-        <fecha>2024-10-09</fecha>
-        <tipo>Depósito en Colones</tipo>
-        <monto>20000.0</monto>
-        <comision>false</comision>
-        <montoRetiroComision>0.0</montoRetiroComision>
-        <montoDepositoComision>0.0</montoDepositoComision>
-        <numeroCuenta>cta-0</numeroCuenta>
-    </transaccion>
-    <transaccion>
-        <fecha>2024-10-09</fecha>
-        <tipo>Retiro</tipo>
-        <monto>20000.0</monto>
-        <comision>false</comision>
-        <montoRetiroComision>0.0</montoRetiroComision>
-        <montoDepositoComision>0.0</montoDepositoComision>
-        <numeroCuenta>cta-1</numeroCuenta>
-    </transaccion>
-    <transaccion>
-        <fecha>2024-10-09</fecha>
-        <tipo>Retiro</tipo>
-        <monto>20000.0</monto>
-        <comision>false</comision>
-        <montoRetiroComision>0.0</montoRetiroComision>
-        <montoDepositoComision>0.0</montoDepositoComision>
-        <numeroCuenta>cta-1</numeroCuenta>
-    </transaccion>
-    <transaccion>
-        <fecha>2024-10-09</fecha>
-        <tipo>Retiro</tipo>
-        <monto>100.0</monto>
-        <comision>false</comision>
-        <montoRetiroComision>0.0</montoRetiroComision>
-        <montoDepositoComision>0.0</montoDepositoComision>
-        <numeroCuenta>cta-0</numeroCuenta>
+        <numeroCuenta>cta-2</numeroCuenta>
     </transaccion>
 </transacciones>

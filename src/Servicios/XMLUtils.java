@@ -185,6 +185,7 @@ public class XMLUtils {
                     String numeroCuenta = elementoCuenta.getElementsByTagName("numeroCuenta").item(0).getTextContent();
                     String estatus = elementoCuenta.getElementsByTagName("estatus").item(0).getTextContent();
                     String saldoFormateado = elementoCuenta.getElementsByTagName("saldo").item(0).getTextContent();
+                    saldoFormateado = saldoFormateado.replace(",", ".");
                     double saldo = Double.parseDouble(saldoFormateado);
 
                     String pin = elementoCuenta.getElementsByTagName("pin").item(0).getTextContent();

@@ -11,7 +11,7 @@ import java.security.SecureRandom;
 public class MensajeSMS {
     // Credenciales de Twilio
     private static final String ACCOUNT_SID = "AC260096de90652894c1ed20f7835f57a6";
-    private static final String AUTH_TOKEN = "4e572f7ccfdf1cdf9765346a6759186e";
+    private static final String AUTH_TOKEN = "5b0ca26f04a27eaadcbf8b23a18034a3";
 
     // Código generado
     private String codigoGenerado;

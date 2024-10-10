@@ -118,12 +118,25 @@ public class Cuenta {
             if (mensaje) {
                 while (intentosValidacion <= 3) {
                     if (mensajeCodigo.verificarCodigo(pCodigo)) {
-                        Transaccion nuevaTransaccion = new Transaccion(tipo, pMonto, this.codigo);
-                        transacciones.add(nuevaTransaccion);
-                        nuevaTransaccion.realizarRetiro(pMonto, saldo);
-                        sumaRetiros += pMonto;
-                        cantidadTransacciones++;
-                        break;
+                        if(cantidadTransacciones > 5){
+                            Transaccion nuevaTransaccion = new Transaccion(tipo, pMonto, this.codigo);
+                            transacciones.add(nuevaTransaccion);
+                            double monto = pMonto * 0.2;
+                            nuevaTransaccion.realizarRetiro(monto, saldo);
+                            sumaRetiros += pMonto * 0.2;
+                            cantidadTransacciones++;
+                            break; 
+                            }
+                        else{
+                            Transaccion nuevaTransaccion = new Transaccion(tipo, pMonto, this.codigo);
+                            transacciones.add(nuevaTransaccion);
+                            nuevaTransaccion.realizarRetiro(pMonto, saldo);
+                            sumaRetiros += pMonto;
+                            cantidadTransacciones++;
+                            break; 
+                        }
+
+                        
                     } else {
                         intentosValidacion += 1;
                     }

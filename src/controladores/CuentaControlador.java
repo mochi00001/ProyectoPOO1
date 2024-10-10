@@ -17,6 +17,7 @@ public class CuentaControlador {
     private List<Cuenta> cuentas; // Lista de cuentas
     private MensajeSMS mensajeSMS = new MensajeSMS(); // Para enviar el código de verificación
     private String codigoVerificacion; // Para almacenar el código generado
+    private boolean cuentaAutenticada = false;
 
     public CuentaControlador(ClienteControlador clienteControlador) {
         this.cuentas = new ArrayList<>(); // Inicializa como ArrayList
@@ -56,13 +57,38 @@ public class CuentaControlador {
     }
 
     // Método para autenticar cuenta con número de cuenta y PIN
-    public boolean autenticarCuenta(String numeroCuenta, String pin) {
+    public String autenticarCuenta(String numeroCuenta, String pin) {
         for (Cuenta cuenta : cuentas) {
-            if (cuenta.getCodigo().equals(numeroCuenta)) { // Asumiendo que getCodigo() devuelve el número de cuenta
-                return cuenta.validarIngreso(pin);
+            if (cuenta.getCodigo().equals(numeroCuenta)) {
+                if (cuenta.validarIngreso(pin)) {
+                    // Si el PIN es correcto, retornamos la información del cliente y saldo
+                    Cliente cliente = cuenta.getMiCliente();
+                    double saldo = cuenta.getSaldo(); // Asumiendo que existe un método getSaldo()
+                    String estatus = cuenta.getEstatus(); // Asumiendo que existe un método getEstatus()
+                    cuentaAutenticada = true;
+                    return String.format("Cliente:\n" +
+                                         "Nombre: %s\n" +
+                                         "Identificación: %s\n" + 
+                                         "Número de Teléfono: %s\n" + 
+                                         "Correo: %s\n" +
+                                         "Número de Cuenta: %s\n" +
+                                         "Saldo: %.2f\n" +
+                                         "Estatus: %s",
+                                         cliente.getNombre(), // Asumiendo que existe un método getNombre()
+                                         cliente.getIdentificacion(), // Asumiendo que existe un método getIdentificacion()
+                                         cliente.getNumTelefono(), // Asumiendo que existe un método getNumTelefono()
+                                         cliente.getCorreoElectronico(), // Asumiendo que existe un método getCorreoElectronico()
+                                         cuenta.getCodigo(), 
+                                         saldo, 
+                                         estatus);
+                                         
+                } else {
+                    cuentaAutenticada = false;
+                    return "PIN incorrecto."; // Mensaje si el PIN es incorrecto
+                }
             }
         }
-        return false; // Cuenta no encontrada
+        return "Cuenta no encontrada."; // Mensaje si la cuenta no se encuentra
     }
 
     // Método para crear una cuenta y añadirla al sistema
@@ -97,17 +123,22 @@ public class CuentaControlador {
     }
 
     // Método para eliminar una cuenta
+    // Método para eliminar una cuenta
     public boolean eliminarCuenta(String numeroCuenta, String pin) {
         Iterator<Cuenta> iterator = cuentas.iterator();
         while (iterator.hasNext()) {
             Cuenta cuenta = iterator.next();
-            // System.out.println("Revisando cuenta: " + cuenta.getCodigo() + ", PIN
-            // almacenado: " + cuenta.getPinEncriptado());
+            System.out.println("Revisando cuenta: " + cuenta.getCodigo() + ", PIN almacenado: " + cuenta.getPinEncriptado());
             if (cuenta.getCodigo().equals(numeroCuenta)) {
                 System.out.println("PIN ingresado: " + pin);
                 if (cuenta.validarIngreso(pin)) {
-                    cuenta.eliminarCuenta();
-                    iterator.remove();
+                    // Cambiar el estado de la cuenta a "eliminada"
+                    cuenta.setEstatus("eliminada"); // Asegúrate de que exista este método en la clase Cuenta
+    
+                    // Eliminar las transacciones asociadas a esta cuenta
+                    eliminarTransaccionesAsociadas(numeroCuenta); // Método para eliminar transacciones
+    
+                    // Guardar los cambios en el archivo de cuentas
                     PersistenciaDatos.guardarCuentas(cuentas);
                     return true;
                 } else {
@@ -115,7 +146,23 @@ public class CuentaControlador {
                 }
             }
         }
-        return false;
+        return false; // Retorna falso si la cuenta no fue encontrada o el PIN es incorrecto
+    }
+    
+    // Método para eliminar las transacciones asociadas a la cuenta
+    private void eliminarTransaccionesAsociadas(String numeroCuenta) {
+        List<Transaccion> transacciones = PersistenciaDatos.cargarTransacciones(); // Método para cargar las transacciones del XML
+        Iterator<Transaccion> iterator = transacciones.iterator();
+        
+        while (iterator.hasNext()) {
+            Transaccion transaccion = iterator.next();
+            if (transaccion.getCodigoCuenta().equals(numeroCuenta)) {
+                iterator.remove(); // Eliminar la transacción
+            }
+        }
+        
+        // Guardar las transacciones actualizadas en el archivo
+        PersistenciaDatos.guardarTransacciones(transacciones); // Asegúrate de tener este método
     }
 
     public boolean cambiarPIN(Cuenta cuenta, String nuevoPin) {
@@ -281,7 +328,7 @@ public class CuentaControlador {
             Cuenta cuentaDestino = cuentaDestinoOpt.get();
 
             // Verificar si el PIN es correcto
-            if (!autenticarCuenta(numeroCuentaOrigen, pin)) {
+            if (!cuentaAutenticada) {
                 System.out.println("Error: El PIN es incorrecto.");
                 return false;
             }

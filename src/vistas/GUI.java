@@ -424,7 +424,7 @@ public class GUI {
     }
 
     private void realizarDeposito() {
-        //TipoDeCambioBCCR.obtenerTipoCambioHoy();
+        TipoDeCambioBCCR.obtenerTipoCambioHoy();
 
         String numeroCuenta = JOptionPane.showInputDialog("Ingrese número de cuenta:");
     

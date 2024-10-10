@@ -3,15 +3,22 @@
     <cuenta>
         <numeroCuenta>cta-0</numeroCuenta>
         <estatus>Activa</estatus>
-        <saldo>99900.00</saldo>
+        <saldo>99900,00</saldo>
         <identificacion>305260528</identificacion>
         <pin>123Fer</pin>
     </cuenta>
     <cuenta>
         <numeroCuenta>cta-1</numeroCuenta>
         <estatus>Activa</estatus>
-        <saldo>600000.00</saldo>
+        <saldo>600000,00</saldo>
         <identificacion>305260528</identificacion>
         <pin>123Fer</pin>
+    </cuenta>
+    <cuenta>
+        <numeroCuenta>cta-2</numeroCuenta>
+        <estatus>Activa</estatus>
+        <saldo>7477,63</saldo>
+        <identificacion>119250036</identificacion>
+        <pin>Sergi1</pin>
     </cuenta>
 </cuentas>

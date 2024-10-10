@@ -36,7 +36,7 @@ public class CLI {
     public void iniciar() {
 
         System.out.println("--- Bienvenido al Sistema Bancario ---");
-        iniciarSesion(); // Verificamos el inicio de sesión
+        //iniciarSesion(); // Verificamos el inicio de sesión
 
         boolean ejecutar = true;
         while (ejecutar) {
@@ -68,7 +68,7 @@ public class CLI {
             }
         }
     }
-
+/* 
     // Muestra el menú de inicio de sesión
     private void iniciarSesion() {
         while (!autenticado) {
@@ -84,7 +84,7 @@ public class CLI {
                 System.out.println("Error: Número de cuenta o PIN incorrecto.");
             }
         }
-    }
+    }*/
 
     private void mostrarMenuPrincipal() {
         System.out.println("\n--- Menú Principal ---");
@@ -281,7 +281,8 @@ public class CLI {
         String numTelefono;
         while (true) {
             numTelefono = leerString("Ingrese el número telefónico del cliente (debe tener 8 dígitos): ");
-            if (numTelefono.length() == 8 && numTelefono.matches("\\d+")) { // Validar longitud y que sean solo dígitos
+            String numTelefonoStr = "+506" + numTelefono;
+            if (numTelefonoStr.length() == 12 && numTelefono.matches("\\d+")) { // Validar longitud y que sean solo dígitos
                 break;
             } else {
                 System.out.println("Número telefónico inválido. Debe contener exactamente 8 dígitos.");
@@ -299,8 +300,9 @@ public class CLI {
             }
         }
 
+        String numTelefonoStr = "+506" + numTelefono;
         // Crear el cliente
-        boolean resultado = clienteControlador.crearCliente(nombre, identificacion, numTelefono, correoElectronico);
+        boolean resultado = clienteControlador.crearCliente(nombre, identificacion, numTelefonoStr, correoElectronico);
 
         // Confirmar el resultado
         if (resultado) {
@@ -336,7 +338,8 @@ public class CLI {
             String nuevoTelefono;
             while (true) {
                 nuevoTelefono = leerString("Ingrese el nuevo número telefónico (debe tener 8 dígitos): ");
-                if (nuevoTelefono.length() == 8 && nuevoTelefono.matches("\\d+")) { // Validar longitud y que sean solo
+                String nuevoTelefonoStr = "+506" + nuevoTelefono;
+                if (nuevoTelefonoStr.length() == 12 && nuevoTelefono.matches("\\d+")) { // Validar longitud y que sean solo
                                                                                     // dígitos
                     break;
                 } else {
@@ -344,8 +347,9 @@ public class CLI {
                 }
             }
 
+            String nuevoTelefonoStr = "+506" + nuevoTelefono;
             // Actualizar el número de teléfono del cliente
-            boolean resultado = clienteControlador.actualizarTelefono(identificacion, nuevoTelefono);
+            boolean resultado = clienteControlador.actualizarTelefono(identificacion, nuevoTelefonoStr);
 
             // Confirmar el resultado
             if (resultado) {
@@ -828,33 +832,38 @@ public class CLI {
     // Métodos para las operaciones del menú de consultas y reportes
 
     public void consultarTransacciones() {
-        Scanner scanner = new Scanner(System.in);
+        String numeroCuenta = leerString("Ingrese el número de cuenta: ");
 
-        // Solicitar número de cuenta
-        System.out.print("Ingrese el número de cuenta: ");
-        String numeroCuenta = scanner.nextLine();
-
-        // Verificar si la cuenta existe
+        // Verificar que la cuenta exista
         if (!cuentasControlador.verificarCuenta(numeroCuenta)) {
-            System.out.println("Error: La cuenta no existe.");
+            System.out.println("La cuenta no está registrada.");
             return;
         }
 
-        // Solicitar el PIN
-        System.out.print("Ingrese su PIN: ");
-        String pin = scanner.nextLine();
+        String pin = leerString("Ingrese el PIN actual: ");
 
-        // Enviar la palabra de verificación por SMS
+        // Autenticar PIN
+        if (!cuentasControlador.autenticarCuenta(numeroCuenta, pin)) {
+            System.out.println("El PIN es incorrecto.");
+            return;
+        }
+
+        // Enviar código de verificación
         String codigoVerificacion = cuentasControlador.enviarCodigoVerificacion(numeroCuenta);
         if (codigoVerificacion == null) {
-            System.out.println("Error: No se pudo enviar la palabra de verificación.");
+            System.out.println("No se pudo enviar el código de verificación.");
             return;
         }
 
-        // Solicitar la palabra de verificación
-        System.out.print("Ingrese la palabra de verificación que recibió por mensaje: ");
-        String palabraIngresada = scanner.nextLine();
+        System.out.println("Estimado usuario: " + cuentasControlador.obtenerNombreCliente(numeroCuenta)
+                + ", se ha enviado una palabra por mensaje de texto, por favor revise sus mensajes y proceda a digitar la palabra enviada.");
 
+        // Ingresar la palabra enviada por SMS
+        String palabraIngresada = leerString("Ingrese la palabra enviada por mensaje de texto: ");
+        if (!cuentasControlador.validarCodigoVerificacion(numeroCuenta, palabraIngresada)) {
+            System.out.println("La palabra ingresada es incorrecta.");
+            return;
+        }
         // Consultar transacciones
         List<Transaccion> transacciones = transaccionesControlador.consultarTransacciones(numeroCuenta, pin,
                 palabraIngresada);

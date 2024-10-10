@@ -36,4 +36,16 @@
         <numTelefono>+50687068702</numTelefono>
         <correoElectronico>fernandasperez1@gmail.com</correoElectronico>
     </cliente>
+    <cliente>
+        <nombre>Luis</nombre>
+        <identificacion>119250035</identificacion>
+        <numTelefono>89655235</numTelefono>
+        <correoElectronico>triguerospsergio@gmail.com</correoElectronico>
+    </cliente>
+    <cliente>
+        <nombre>Luis</nombre>
+        <identificacion>119250036</identificacion>
+        <numTelefono>+50689655235</numTelefono>
+        <correoElectronico>triguerospsergio@gmail.com</correoElectronico>
+    </cliente>
 </clientes>
